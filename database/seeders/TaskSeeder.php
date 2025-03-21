@@ -17,7 +17,7 @@ class TaskSeeder extends Seeder
         $users = User::all();
 
         $users->each(function ($user) {
-            Task::factory(3)->create([
+            Task::factory(10)->create([
                 'user_id' => $user->id,
             ]);
         });

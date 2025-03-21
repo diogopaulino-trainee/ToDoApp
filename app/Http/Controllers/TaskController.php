@@ -32,7 +32,7 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title'       => 'required|string|min:3',
-            'description' => 'nullable|string',
+            'description' => 'required|string|min:3',
             'priority'    => 'required|in:low,medium,high',
             'due_date'    => 'nullable|date|after_or_equal:today',
         ]);
@@ -41,7 +41,7 @@ class TaskController extends Controller
             auth()->user()->tasks()->create($validated);
             return redirect()->route('tasks.index')->with('success', 'Task added successfully!');
         } catch (\Exception $e) {
-            return redirect()->route('tasks.index')->with('error', 'Failed to add task.');
+            return response()->json(['message' => 'Failed to add task.', 'error' => $e->getMessage()], 422);
         }
     }
 
@@ -53,7 +53,7 @@ class TaskController extends Controller
 
         $validated = $request->validate([
             'title'       => 'sometimes|required|string|min:3',
-            'description' => 'sometimes|nullable|string',
+            'description' => 'sometimes|required|string|min:3',
             'priority'    => 'sometimes|required|in:low,medium,high',
             'due_date'    => 'sometimes|nullable|date|after_or_equal:today',
             'completed'   => 'required|boolean',
