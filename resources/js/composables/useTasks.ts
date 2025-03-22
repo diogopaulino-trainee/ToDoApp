@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { useToast } from "primevue/usetoast";
 
@@ -71,20 +71,17 @@ export function useTasks(propsTasks: Task[]) {
    * 
    * @param evt - Draggable change event
    */
-  const updateTasks = (evt: DraggableChangeEvent<Task>) => {
-    if (!evt || (!evt.added && !evt.removed)) return;
-
-    const movedTask = evt.added?.element || evt.removed?.element;
+  const updateTasks = (evt: DraggableChangeEvent<Task>, isTargetCompleted: boolean) => {
+    if (!evt || !evt.added) return;
+  
+    const movedTask = evt.added.element;
     if (!movedTask) return;
-
-    if (evt.added) {
-      movedTask.completed = completedTasks.value.includes(movedTask);
-    }
-
+  
+    movedTask.completed = isTargetCompleted;
+  
     useForm({ completed: movedTask.completed }).patch(route("tasks.update", movedTask.id), {
       preserveScroll: true,
       onSuccess: () => {
-        flashMessage.value = flash?.success || "";
         toast.add({
           severity: "info",
           summary: "Task Updated",
@@ -93,9 +90,16 @@ export function useTasks(propsTasks: Task[]) {
             : `"${movedTask.title}" moved back to pending!"`,
           life: 3000,
         });
+  
+        if (movedTask.completed) {
+          pendingTasks.value = pendingTasks.value.filter((t) => t.id !== movedTask.id);
+          completedTasks.value.push(movedTask);
+        } else {
+          completedTasks.value = completedTasks.value.filter((t) => t.id !== movedTask.id);
+          pendingTasks.value.push(movedTask);
+        }
       },
       onError: () => {
-        errorMessage.value = flash?.error || "";
         toast.add({
           severity: "error",
           summary: "Error",
@@ -270,6 +274,46 @@ export function useTasks(propsTasks: Task[]) {
     });
   };
 
+  const searchTerm = ref("");
+  const sortBy = ref<'priority' | 'due_date'>('due_date');
+  const sortDirection = ref<'asc' | 'desc'>('asc');
+
+  const sortTasks = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      if (sortBy.value === 'priority') {
+        const priorityOrder = { high: 1, medium: 2, low: 3 };
+        const result = priorityOrder[a.priority] - priorityOrder[b.priority];
+        return sortDirection.value === 'asc' ? result : -result;
+      }
+
+      if (sortBy.value === 'due_date') {
+        const dateA = a.due_date || '';
+        const dateB = b.due_date || '';
+        const result = dateA.localeCompare(dateB);
+        return sortDirection.value === 'asc' ? result : -result;
+      }
+
+      return 0;
+    });
+  };
+
+  const matchesSearch = (task: Task) => {
+    const search = searchTerm.value.toLowerCase();
+    return (
+      task.title.toLowerCase().includes(search) ||
+      task.description.toLowerCase().includes(search) ||
+      (task.due_date && task.due_date.includes(search))
+    );
+  };
+
+  const filteredPendingTasks = computed(() =>
+    sortTasks(pendingTasks.value.filter(matchesSearch))
+  );
+
+  const filteredCompletedTasks = computed(() =>
+    sortTasks(completedTasks.value.filter(matchesSearch))
+  );
+
   return {
     form,
     isLoading,
@@ -277,6 +321,11 @@ export function useTasks(propsTasks: Task[]) {
     completedTasks,
     flashMessage,
     errorMessage,
+    searchTerm,
+    sortBy,
+    sortDirection,
+    filteredPendingTasks,
+    filteredCompletedTasks,
     submit,
     updateTasks,
     toggleComplete,

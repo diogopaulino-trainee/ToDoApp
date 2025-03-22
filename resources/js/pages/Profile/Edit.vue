@@ -19,7 +19,7 @@ defineProps({
     <AppLayout title="Profile">
         <Head title="Profile" />
 
-        <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-6">
+        <h2 class="text-2xl font-bold mb-6 mt-4">
             Profile Settings
         </h2>
 

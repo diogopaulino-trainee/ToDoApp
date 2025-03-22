@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import draggable from "vuedraggable";
 import Toast from "primevue/toast";
@@ -19,12 +19,17 @@ const {
   completedTasks,
   flashMessage,
   errorMessage,
+  filteredPendingTasks,
+  filteredCompletedTasks,
+  searchTerm,
+  sortBy,
+  sortDirection,
   submit,
   updateTasks,
   toggleComplete,
   deleteTask,
   saveTaskEdit,
-  togglePriority,
+  togglePriority,  
 } = useTasks(props.tasks);
 
 watchEffect(() => {
@@ -49,7 +54,7 @@ watchEffect(() => {
     </template>
 
     <div class="py-12">
-      <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-center mb-6">
             <button
@@ -89,12 +94,39 @@ watchEffect(() => {
             </form>
           </transition>
 
+          <!-- Search & Sort -->
+          <div class="mb-6 mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <input
+              v-model="searchTerm"
+              type="text"
+              placeholder="Search tasks..."
+              class="border p-2 rounded w-full md:w-1/2 dark:bg-gray-700 dark:text-white"
+            />
+
+            <div class="flex gap-2 items-center">
+              <label class="text-white">Sort by:</label>
+              <select v-model="sortBy" class="border p-2 rounded dark:bg-gray-700 dark:text-white">
+                <option value="due_date">Due Date</option>
+                <option value="priority">Priority</option>
+              </select>
+              <button
+                @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
+                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+              >
+                {{ sortDirection === 'asc' ? 'Asc' : 'Desc' }}
+              </button>
+            </div>
+          </div>
+
           <!-- Task Columns -->
-          <div class="grid grid-cols-2 gap-6 mt-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <!-- Pending Tasks -->
-            <div>
+            <div class="max-h-[calc(100vh-300px)] overflow-y-auto pr-1 scrollbar-thin">
               <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">Pending Tasks</h3>
-              <draggable v-model="pendingTasks" group="tasks" itemKey="id" @change="updateTasks">
+              <div v-if="!filteredPendingTasks.length && pendingTasks.length" class="text-center text-gray-400 italic py-4">
+                No matching pending tasks found for your search. Try adjusting the keywords!
+              </div>
+              <draggable :list="filteredPendingTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, false)">
                 <template #item="{ element: task, index }">
                   <div>
                     <div class="border p-4 rounded-lg bg-gray-800 text-white">
@@ -184,9 +216,12 @@ watchEffect(() => {
             </div>
 
             <!-- Completed Tasks -->
-            <div>
+            <div class="max-h-[calc(100vh-300px)] overflow-y-auto pr-1 scrollbar-thin">
               <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">Completed Tasks</h3>
-              <draggable v-model="completedTasks" group="tasks" itemKey="id" @change="updateTasks">
+              <div v-if="!filteredCompletedTasks.length && completedTasks.length" class="text-center text-gray-400 italic py-4">
+                No matching completed tasks found. Try a different search term.
+              </div>
+              <draggable :list="filteredCompletedTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, true)">
                 <template #item="{ element: task, index }">
                   <div>
                     <div class="border p-4 rounded-lg bg-green-700 text-white">
@@ -194,7 +229,7 @@ watchEffect(() => {
                         <transition name="fade-zoom" mode="out-in">
                           <h3
                             v-if="!task.isEditingTitle"
-                            class="text-lg font-bold cursor-pointer flex items-center gap-1 hover:underline text-gray-300"
+                            class="text-lg font-bold cursor-pointer flex items-center gap-1 hover:underline text-gray-300 line-through"
                             title="Click to edit title"
                             @click="task.isEditingTitle = true"
                           >
@@ -277,6 +312,9 @@ watchEffect(() => {
                 </template>
               </draggable>
             </div>
+          </div>
+          <div v-if="!pendingTasks.length && !completedTasks.length" class="text-center text-gray-400 italic py-4">
+            You don't have any tasks yet. Start by adding your first To-Do task and take control of your productivity!
           </div>
         </div>
       </div>
