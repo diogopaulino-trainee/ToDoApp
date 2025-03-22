@@ -56,7 +56,7 @@ class TaskController extends Controller
             'description' => 'sometimes|required|string|min:3',
             'priority'    => 'sometimes|required|in:low,medium,high',
             'due_date'    => 'sometimes|nullable|date|after_or_equal:today',
-            'completed'   => 'required|boolean',
+            'completed'   => 'sometimes|boolean',
         ]);
 
         try {
