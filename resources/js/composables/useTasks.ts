@@ -1,8 +1,7 @@
 import { ref, computed } from "vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { useToast } from "primevue/usetoast";
-
-
+import { triggerTrashWiggle } from '@/stores/wiggleStore';
 
 /**
  * Represents flash messages coming from the backend.
@@ -25,6 +24,7 @@ export interface Task {
   isEditingTitle?: boolean;
   isEditingDescription?: boolean;
   isEditingDate?: boolean;
+  isDeleting?: boolean;
 }
 
 /**
@@ -45,6 +45,7 @@ interface DraggableChangeEvent<T = unknown> {
 export function useTasks(propsTasks: Task[]) {
   const toast = useToast();
   const isLoading = ref(false);
+  const trashWiggle = ref(false);
 
   const page = usePage();
   const flash = page.props.flash as FlashMessages;
@@ -62,6 +63,13 @@ export function useTasks(propsTasks: Task[]) {
     due_date: "",
     subtasks: [] as string[],
   });
+
+  const triggerWiggle = () => {
+    trashWiggle.value = true;
+    setTimeout(() => {
+      trashWiggle.value = false;
+    }, 1000);
+  };
 
   const addSubtaskField = () => {
     form.subtasks.push("");
@@ -221,16 +229,22 @@ export function useTasks(propsTasks: Task[]) {
    * @param task - Task to delete
    */
   const deleteTask = (task: Task) => {
-    useForm({}).delete(route("tasks.destroy", task.id), {
-      onSuccess: () => {
-        toast.add({ severity: "success", summary: "Success", detail: "Task deleted!", life: 3000 });
-        pendingTasks.value = pendingTasks.value.filter((t) => t.id !== task.id);
-        completedTasks.value = completedTasks.value.filter((t) => t.id !== task.id);
-      },
-      onError: () => {
-        toast.add({ severity: "error", summary: "Error", detail: "Failed to delete task!", life: 3000 });
-      },
-    });
+    triggerTrashWiggle();
+    task.isDeleting = true;
+  
+    setTimeout(() => {
+      useForm({}).delete(route("tasks.destroy", task.id), {
+        onSuccess: () => {
+          toast.add({ severity: "success", summary: "Success", detail: "Task deleted!", life: 3000 });
+          pendingTasks.value = pendingTasks.value.filter((t) => t.id !== task.id);
+          completedTasks.value = completedTasks.value.filter((t) => t.id !== task.id);
+        },
+        onError: () => {
+          toast.add({ severity: "error", summary: "Error", detail: "Failed to delete task!", life: 3000 });
+          task.isDeleting = false;
+        },
+      });
+    }, 600);
   };
 
   const isSaving = ref(false);
@@ -361,6 +375,8 @@ export function useTasks(propsTasks: Task[]) {
     filteredCompletedTasks,
     selectedTask,
     showSubtaskModal,
+    trashWiggle,
+    triggerWiggle,
     submit,
     updateTasks,
     toggleComplete,

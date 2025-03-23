@@ -2,6 +2,17 @@
 import { computed } from 'vue';
 import { Head, usePage, Link } from '@inertiajs/vue3';
 import type { BreadcrumbItemType } from '@/types';
+import { ref } from 'vue';
+
+import { trashWiggle } from '@/stores/wiggleStore';
+
+const triggerTrashWiggle = () => {
+  trashWiggle.value = true;
+  setTimeout(() => {
+    trashWiggle.value = false;
+  }, 1000);
+};
+
 const csrfToken = usePage().props.csrf_token as string;
 
 
@@ -66,6 +77,33 @@ const authUser = computed(() => page.props.auth?.user ?? null);
             <Link v-if="authUser" :href="route('profile.edit')" class="px-3 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600">
                 Profile
             </Link>
+            <Link
+                v-if="authUser"
+                :href="route('tasks.recycle')"
+                class="px-3 py-2 bg-gray-700 text-white rounded shadow hover:bg-gray-800 flex items-center justify-center"
+                title="Recycle Bin"
+                >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-trash-2 w-6 h-6 transition transform"
+                    :class="{ 'animate-wiggle': trashWiggle }"
+                >
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" x2="10" y1="11" y2="17"/>
+                    <line x1="14" x2="14" y1="11" y2="17"/>
+                </svg>
+            </Link>
+
             <Link
                 v-if="authUser"
                 :href="route('logout')"

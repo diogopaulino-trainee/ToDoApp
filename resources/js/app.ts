@@ -46,7 +46,6 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(PrimeVue)
             .use(ToastService)
-            .use(vfm)
             .mount(el);
     },
     progress: {

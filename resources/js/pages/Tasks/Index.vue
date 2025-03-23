@@ -183,7 +183,7 @@ watchEffect(() => {
               <draggable :list="filteredPendingTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, false)">
                 <template #item="{ element: task, index }">
                   <div>
-                    <div class="border p-4 rounded-lg bg-gray-800 text-white">
+                    <div class="border p-4 rounded-lg bg-gray-800 text-white transition-all duration-500" :class="{ 'animate-flyToTrash': task.isDeleting }">
                       <div>
                         <transition name="fade-zoom" mode="out-in">
                           <h3
@@ -279,7 +279,7 @@ watchEffect(() => {
               <draggable :list="filteredCompletedTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, true)">
                 <template #item="{ element: task, index }">
                   <div>
-                    <div class="border p-4 rounded-lg bg-green-700 text-white">
+                    <div class="border p-4 rounded-lg bg-green-700 text-white transition-all duration-500" :class="{ 'animate-flyToTrash': task.isDeleting }">
                       <div>
                         <transition name="fade-zoom" mode="out-in">
                           <h3

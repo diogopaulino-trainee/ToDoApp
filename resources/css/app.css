@@ -170,3 +170,7 @@
   opacity: 0;
   transform: translateY(10px);
 }
+
+.will-animate {
+  will-change: transform, opacity;
+}

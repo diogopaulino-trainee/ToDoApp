@@ -14,6 +14,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = auth()->user()->tasks()
+            ->where('is_deleted', false)
             ->orderBy('due_date', 'asc')
             ->orderByRaw("
                 CASE 
@@ -104,12 +105,30 @@ class TaskController extends Controller
         if ($task->user_id !== auth()->id()) {
             return abort(403, 'You do not have permission to delete this task.');
         }
-
+    
         try {
-            $task->delete();
-            return redirect()->route('tasks.index')->with('success', 'Task deleted successfully!');
+            $task->update(['is_deleted' => true]);
+            return redirect()->route('tasks.index')->with('success', 'Task moved to Recycle Bin!');
         } catch (\Exception $e) {
-            return redirect()->route('tasks.index')->with('error', 'Failed to delete task.');
+            return redirect()->route('tasks.index')->with('error', 'Failed to move task to Recycle Bin.');
         }
+    }
+
+    public function recycleBin()
+    {
+        $deletedTasks = auth()->user()->tasks()->where('is_deleted', true)->get();
+
+        return Inertia::render('Tasks/RecycleBin', [
+            'deletedTasks' => $deletedTasks,
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $task = Task::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        $task->update(['is_deleted' => false]);
+
+        return redirect()->route('tasks.recycle')->with('success', 'Task restored successfully!');
     }
 }

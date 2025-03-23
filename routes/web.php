@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+    Route::get('/tasks/recycle', [TaskController::class, 'recycleBin'])->name('tasks.recycle');
+    Route::patch('/tasks/restore/{id}', [TaskController::class, 'restore'])->name('tasks.restore');
 
     Route::post('/tasks/{task}/subtasks', [SubTaskController::class, 'store'])->name('subtasks.store');
     Route::patch('/subtasks/{subtask}', [SubTaskController::class, 'update'])->name('subtasks.update');
