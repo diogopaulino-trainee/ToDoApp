@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SubTask;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,7 +20,12 @@ class TaskSeeder extends Seeder
         $users->each(function ($user) {
             Task::factory(10)->create([
                 'user_id' => $user->id,
-            ]);
+            ])->each(function ($task) {
+                SubTask::factory(rand(1, 3))->create([
+                    'task_id' => $task->id,
+                    'completed' => $task->completed,
+                ]);
+            });
         });
     }
 }

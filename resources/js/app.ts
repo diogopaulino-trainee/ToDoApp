@@ -9,6 +9,8 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { initializeTheme } from './composables/useAppearance';
 import vFocus from './directives/vFocus';
+import { createVfm } from 'vue-final-modal'
+import 'vue-final-modal/style.css'
 
 // Extend ImportMeta interface for Vite...
 // declare module 'vite/client' {
@@ -37,11 +39,14 @@ createInertiaApp({
 
         app.directive('focus', vFocus);
 
+        const vfm = createVfm()
+
         app
             .use(plugin)
             .use(ZiggyVue)
             .use(PrimeVue)
             .use(ToastService)
+            .use(vfm)
             .mount(el);
     },
     progress: {

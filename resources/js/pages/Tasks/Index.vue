@@ -1,10 +1,26 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import draggable from "vuedraggable";
 import Toast from "primevue/toast";
 import { useTasks, Task } from "@/composables/useTasks";
 import vFocus from '@/directives/vFocus';
+import SubtaskModal from '@/components/SubtaskModal.vue';
+import { router } from '@inertiajs/vue3';
+
+const showSubtaskModal = ref(false);
+const selectedTaskId = ref<number | null>(null);
+const selectedTaskTitle = ref<string>("");
+
+const openSubtaskModal = (task: Task) => {
+  selectedTaskId.value = task.id;
+  selectedTaskTitle.value = task.title;
+  showSubtaskModal.value = true;
+};
+
+const closeSubtaskModal = () => {
+  showSubtaskModal.value = false;
+};
 
 const props = defineProps<{
   tasks: Task[];
@@ -24,12 +40,14 @@ const {
   searchTerm,
   sortBy,
   sortDirection,
+  addSubtaskField,
+  removeSubtaskField,
   submit,
   updateTasks,
   toggleComplete,
   deleteTask,
   saveTaskEdit,
-  togglePriority,  
+  togglePriority,
 } = useTasks(props.tasks);
 
 watchEffect(() => {
@@ -80,6 +98,42 @@ watchEffect(() => {
                   <option value="high">High Priority</option>
                 </select>
                 <input v-model="form.due_date" type="date" class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white" />
+              </div>
+
+              <!-- Subtasks -->
+              <div class="space-y-2">
+                <label class="block text-white font-semibold">Subtasks</label>
+
+                <transition-group name="fade-zoom" tag="div" class="space-y-2">
+                  <div
+                    v-for="(subtask, index) in form.subtasks"
+                    :key="index"
+                    class="flex items-center gap-2"
+                  >
+                    <input
+                      v-model="form.subtasks[index]"
+                      type="text"
+                      placeholder="Subtask description..."
+                      class="w-full border p-2 rounded dark:bg-gray-700 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      @click="removeSubtaskField(index)"
+                      class="text-red-500 hover:text-red-700 transition"
+                      title="Remove Subtask"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </transition-group>
+
+                <button
+                  type="button"
+                  @click="addSubtaskField"
+                  class="mt-2 px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+                >
+                  + Add Subtask
+                </button>
               </div>
               <button type="submit" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full disabled:opacity-50" :disabled="isLoading">
                 <span v-if="isLoading">Adding Task...</span>
@@ -205,8 +259,9 @@ watchEffect(() => {
                         </div>
                       </div>
                       <div class="flex justify-end space-x-2 mt-3">
-                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Complete</button>
+                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Complete</button>
                         <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                        <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
                       </div>
                     </div>
                     <hr v-if="index < pendingTasks.length - 1" class="my-2 border-gray-500 dark:border-gray-400 w-11/12 mx-auto"/>
@@ -303,8 +358,9 @@ watchEffect(() => {
                         </div>
                       </div>
                       <div class="flex justify-end space-x-2 mt-3">
-                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Undo</button>
-                        <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 transition">Undo</button>
+                        <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Delete</button>
+                        <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
                       </div>
                     </div>
                     <hr v-if="index < completedTasks.length - 1" class="my-2 border-gray-500 dark:border-gray-400 w-11/12 mx-auto"/>
@@ -319,5 +375,14 @@ watchEffect(() => {
         </div>
       </div>
     </div>
+    <transition name="fade-slide">
+      <SubtaskModal
+        v-if="showSubtaskModal"
+        :task-id="selectedTaskId!"
+        :task-title="selectedTaskTitle"
+        @close="closeSubtaskModal"
+        @updated="router.visit(route('tasks.index'), { preserveScroll: true })"
+      />
+    </transition>
   </AppLayout>
 </template>

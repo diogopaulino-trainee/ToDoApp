@@ -2,6 +2,8 @@ import { ref, computed } from "vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { useToast } from "primevue/usetoast";
 
+
+
 /**
  * Represents flash messages coming from the backend.
  */
@@ -58,7 +60,16 @@ export function useTasks(propsTasks: Task[]) {
     description: "",
     priority: "medium",
     due_date: "",
+    subtasks: [] as string[],
   });
+
+  const addSubtaskField = () => {
+    form.subtasks.push("");
+  };
+  
+  const removeSubtaskField = (index: number) => {
+    form.subtasks.splice(index, 1);
+  };
 
   /**
    * Reactive lists of pending and completed tasks.
@@ -117,6 +128,8 @@ export function useTasks(propsTasks: Task[]) {
    */
   const submit = () => {
     isLoading.value = true;
+
+    form.subtasks = form.subtasks.filter((sub) => sub.trim() !== "");
 
     form.post(route("tasks.store"), {
       onSuccess: () => {
@@ -260,7 +273,7 @@ export function useTasks(propsTasks: Task[]) {
           severity: "info",
           summary: "Priority Updated",
           detail: `Priority changed to ${task.priority.toUpperCase()}`,
-          life: 2000,
+          life: 3000,
         });
       },
       onError: () => {
@@ -314,6 +327,26 @@ export function useTasks(propsTasks: Task[]) {
     sortTasks(completedTasks.value.filter(matchesSearch))
   );
 
+  /**
+   * Controls the visibility of the Subtask modal.
+   */
+  const showSubtaskModal = ref(false);
+
+  /**
+   * Stores the currently selected task whose subtasks are being managed.
+   */
+  const selectedTask = ref<Task | null>(null);
+
+  /**
+   * Opens the Subtask modal and assigns the selected task.
+   * 
+   * @param task - The task object to manage subtasks for.
+   */
+  const openSubtaskModal = (task: Task) => {
+    selectedTask.value = task;
+    showSubtaskModal.value = true;
+  };
+
   return {
     form,
     isLoading,
@@ -326,11 +359,16 @@ export function useTasks(propsTasks: Task[]) {
     sortDirection,
     filteredPendingTasks,
     filteredCompletedTasks,
+    selectedTask,
+    showSubtaskModal,
     submit,
     updateTasks,
     toggleComplete,
     deleteTask,
     saveTaskEdit,
     togglePriority,
+    openSubtaskModal,
+    addSubtaskField,
+    removeSubtaskField,
   };
 }
