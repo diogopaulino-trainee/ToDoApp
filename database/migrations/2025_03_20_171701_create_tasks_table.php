@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
-            $table->date('due_date')->nullable();
+            $table->dateTime('due_datetime')->nullable();
             $table->boolean('completed')->default(false);
             $table->boolean('is_deleted')->default(false);
             $table->timestamps();

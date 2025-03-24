@@ -15,7 +15,7 @@ class TaskController extends Controller
     {
         $tasks = auth()->user()->tasks()
             ->where('is_deleted', false)
-            ->orderBy('due_date', 'asc')
+            ->orderBy('due_datetime', 'asc')
             ->orderByRaw("
                 CASE 
                     WHEN priority = 'high' THEN 1
@@ -41,7 +41,7 @@ class TaskController extends Controller
             'title'       => 'required|string|min:3',
             'description' => 'required|string|min:3',
             'priority'    => 'required|in:low,medium,high',
-            'due_date'    => 'nullable|date|after_or_equal:today',
+            'due_datetime'    => 'nullable|date|after_or_equal:today',
         ]);
 
         try {
@@ -79,7 +79,7 @@ class TaskController extends Controller
             'title'       => 'sometimes|required|string|min:3',
             'description' => 'sometimes|required|string|min:3',
             'priority'    => 'sometimes|required|in:low,medium,high',
-            'due_date'    => 'sometimes|nullable|date|after_or_equal:today',
+            'due_datetime'    => 'sometimes|nullable|date|after_or_equal:today',
             'completed'   => 'sometimes|boolean',
         ]);
 

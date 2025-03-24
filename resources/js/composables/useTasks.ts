@@ -2,6 +2,9 @@ import { ref, computed } from "vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { useToast } from "primevue/usetoast";
 import { triggerTrashWiggle } from '@/stores/wiggleStore';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 /**
  * Represents flash messages coming from the backend.
@@ -20,7 +23,7 @@ export interface Task {
   description: string;
   priority: "low" | "medium" | "high";
   completed: boolean;
-  due_date?: string;
+  due_datetime?: string | null;
   isEditingTitle?: boolean;
   isEditingDescription?: boolean;
   isEditingDate?: boolean;
@@ -60,7 +63,7 @@ export function useTasks(propsTasks: Task[]) {
     title: "",
     description: "",
     priority: "medium",
-    due_date: "",
+    due_datetime: '',
     subtasks: [] as string[],
   });
 
@@ -138,6 +141,22 @@ export function useTasks(propsTasks: Task[]) {
     isLoading.value = true;
 
     form.subtasks = form.subtasks.filter((sub) => sub.trim() !== "");
+
+    if (form.due_datetime) {
+      const parsed = dayjs(form.due_datetime, 'DD/MM/YYYY HH:mm');
+      if (parsed.isValid()) {
+        form.due_datetime = parsed.format('YYYY-MM-DD HH:mm:ss');
+      } else {
+        toast.add({
+          severity: "error",
+          summary: "Invalid Date",
+          detail: "Please provide a valid date and time.",
+          life: 3000,
+        });
+        isLoading.value = false;
+        return;
+      }
+    }
 
     form.post(route("tasks.store"), {
       onSuccess: () => {
@@ -260,7 +279,7 @@ export function useTasks(propsTasks: Task[]) {
     useForm({
       title: task.title,
       description: task.description,
-      due_date: task.due_date,
+      due_datetime: task.due_datetime,
       priority: task.priority
     }).patch(route("tasks.update", task.id), {
       preserveScroll: true,
@@ -302,7 +321,7 @@ export function useTasks(propsTasks: Task[]) {
   };
 
   const searchTerm = ref("");
-  const sortBy = ref<'priority' | 'due_date'>('due_date');
+  const sortBy = ref<'priority' | 'due_datetime'>('due_datetime');
   const sortDirection = ref<'asc' | 'desc'>('asc');
 
   const sortTasks = (tasks: Task[]) => {
@@ -313,9 +332,9 @@ export function useTasks(propsTasks: Task[]) {
         return sortDirection.value === 'asc' ? result : -result;
       }
 
-      if (sortBy.value === 'due_date') {
-        const dateA = a.due_date || '';
-        const dateB = b.due_date || '';
+      if (sortBy.value === 'due_datetime') {
+        const dateA = a.due_datetime || '';
+        const dateB = b.due_datetime || '';
         const result = dateA.localeCompare(dateB);
         return sortDirection.value === 'asc' ? result : -result;
       }
@@ -329,7 +348,7 @@ export function useTasks(propsTasks: Task[]) {
     return (
       task.title.toLowerCase().includes(search) ||
       task.description.toLowerCase().includes(search) ||
-      (task.due_date && task.due_date.includes(search))
+      (task.due_datetime && task.due_datetime.includes(search))
     );
   };
 

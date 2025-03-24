@@ -7,6 +7,8 @@ import { useTasks, Task } from "@/composables/useTasks";
 import vFocus from '@/directives/vFocus';
 import SubtaskModal from '@/components/SubtaskModal.vue';
 import { router } from '@inertiajs/vue3';
+import Flatpickr from 'vue-flatpickr-component';
+import 'flatpickr/dist/flatpickr.css';
 
 const showSubtaskModal = ref(false);
 const selectedTaskId = ref<number | null>(null);
@@ -97,7 +99,17 @@ watchEffect(() => {
                   <option value="medium">Medium Priority</option>
                   <option value="high">High Priority</option>
                 </select>
-                <input v-model="form.due_date" type="date" class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white" />
+                <flatpickr
+                  v-model="form.due_datetime"
+                  :config="{
+                    enableTime: true,
+                    dateFormat: 'd/m/Y H:i',
+                    time_24hr: true,
+                    allowInput: true,
+                  }"
+                  placeholder="Select due date and time"
+                  class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white"
+                />
               </div>
 
               <!-- Subtasks -->
@@ -160,7 +172,7 @@ watchEffect(() => {
             <div class="flex gap-2 items-center">
               <label class="text-white">Sort by:</label>
               <select v-model="sortBy" class="border p-2 rounded dark:bg-gray-700 dark:text-white">
-                <option value="due_date">Due Date</option>
+                <option value="due_datetime">Due Date</option>
                 <option value="priority">Priority</option>
               </select>
               <button
@@ -245,15 +257,17 @@ watchEffect(() => {
                                 title="Click to edit due date"
                                 class="hover:underline hover:text-white cursor-pointer flex items-center gap-1"
                               >
-                                Due: {{ task.due_date || 'No deadline' }}
+                                Due: {{ task.due_datetime ? task.due_datetime.slice(0, 16).replace('T', ' ') : 'No deadline' }}
                               </span>
                               <input v-else
-                                    type="date"
-                                    v-model="task.due_date"
-                                    v-focus
-                                    @blur="() => saveTaskEdit(task)"
-                                    @keydown.enter.prevent="() => saveTaskEdit(task)"
-                                    class="bg-gray-900 text-white rounded p-1" />
+                                type="datetime-local"
+                                :value="task.due_datetime?.slice(0, 16)"
+                                @input="(e) => task.due_datetime = (e.target as HTMLInputElement).value"
+                                v-focus
+                                @blur="() => saveTaskEdit(task)"
+                                @keydown.enter.prevent="() => saveTaskEdit(task)"
+                                class="bg-gray-900 text-white rounded p-1"
+                              />
                             </transition>
                           </span>
                         </div>
@@ -341,18 +355,20 @@ watchEffect(() => {
                                 title="Click to edit due date"
                                 class="hover:underline hover:text-white cursor-pointer flex items-center gap-1"
                               >
-                                Due: {{ task.due_date || 'No deadline' }}
+                                Due: {{ task.due_datetime ? task.due_datetime.slice(0, 16).replace('T', ' ') : 'No deadline' }}
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </span>
                               <input v-else
-                                    type="date"
-                                    v-model="task.due_date"
-                                    v-focus
-                                    @blur="() => saveTaskEdit(task)"
-                                    @keydown.enter.prevent="() => saveTaskEdit(task)"
-                                    class="bg-gray-900 text-white rounded p-1" />
+                                type="datetime-local"
+                                :value="task.due_datetime?.slice(0, 16)"
+                                @input="(e) => task.due_datetime = (e.target as HTMLInputElement).value"
+                                v-focus
+                                @blur="() => saveTaskEdit(task)"
+                                @keydown.enter.prevent="() => saveTaskEdit(task)"
+                                class="bg-gray-900 text-white rounded p-1"
+                              />
                             </transition>
                           </span>
                         </div>
