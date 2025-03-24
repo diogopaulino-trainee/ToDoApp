@@ -68,11 +68,10 @@ defineProps({
 
                 <!-- Card 3 -->
                 <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-8 w-8 text-green-500 mb-3" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M9 12l2 2l4 -4"/>
-                    <path d="M20 6h-7a4 4 0 0 0-4 4v10"/>
-                </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-8 w-8 text-green-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4" />
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+                  </svg>
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Mark as Completed</h3>
                 <p class="mt-2 text-gray-600 dark:text-gray-300">Click to mark tasks as done. Visualize your progress clearly.</p>
                 </div>

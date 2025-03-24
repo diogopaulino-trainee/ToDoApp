@@ -20,4 +20,9 @@ class Task extends Model
     {
         return $this->hasMany(SubTask::class);
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class);
+    }
 }

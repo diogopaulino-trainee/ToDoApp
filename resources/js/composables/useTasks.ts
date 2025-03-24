@@ -28,6 +28,11 @@ export interface Task {
   isEditingDescription?: boolean;
   isEditingDate?: boolean;
   isDeleting?: boolean;
+  attachments?: {
+    id: number;
+    name: string;
+    url: string;
+  }[];
 }
 
 /**
@@ -345,11 +350,62 @@ export function useTasks(propsTasks: Task[]) {
 
   const matchesSearch = (task: Task) => {
     const search = searchTerm.value.toLowerCase();
+  
     return (
-      task.title.toLowerCase().includes(search) ||
-      task.description.toLowerCase().includes(search) ||
-      (task.due_datetime && task.due_datetime.includes(search))
+      matchesPriority(task) &&
+      matchesDate(task) &&
+      matchesAttachments(task) &&
+      (task.title.toLowerCase().includes(search) ||
+       task.description.toLowerCase().includes(search) ||
+       (task.due_datetime && task.due_datetime.includes(search)))
     );
+  };
+
+  const priorityFilter = ref<"all" | "low" | "medium" | "high">("all");
+  const dateFilter = ref<"all" | "today" | "week" | "month" | "next_month" | "after_this_month" | "overdue">("all");
+  const hasAttachmentsFilter = ref<"all" | "with" | "without">("all");
+
+  const matchesPriority = (task: Task) => {
+    return priorityFilter.value === "all" || task.priority === priorityFilter.value;
+  };
+  
+  const matchesDate = (task: Task) => {
+    if (!task.due_datetime) return dateFilter.value === "all";
+  
+    const now = dayjs();
+    const due = dayjs(task.due_datetime);
+  
+    switch (dateFilter.value) {
+      case "today":
+        return due.isSame(now, "day");
+      case "week":
+        return due.isSame(now, "week");
+      case "month":
+        return due.isSame(now, "month");
+      case "next_month":
+          return due.isAfter(now.endOf("month")) && due.isSame(now.add(1, "month"), "month");
+      case "after_this_month":
+          const startNextMonth = now.endOf("month").add(1, "day").startOf("day");
+          return due.isSame(startNextMonth) || due.isAfter(startNextMonth);
+      case "overdue":
+        return due.isBefore(now);
+      default:
+        return true;
+    }
+  };
+  
+  const matchesAttachments = (task: Task) => {
+    const hasAttachments = Array.isArray(task.attachments) && task.attachments.length > 0;
+  
+    if (hasAttachmentsFilter.value === "with") {
+      return hasAttachments;
+    }
+  
+    if (hasAttachmentsFilter.value === "without") {
+      return !hasAttachments;
+    }
+  
+    return true;
   };
 
   const filteredPendingTasks = computed(() =>
@@ -380,6 +436,59 @@ export function useTasks(propsTasks: Task[]) {
     showSubtaskModal.value = true;
   };
 
+  const uploadAttachments = async (files: FileList | null, taskId: number) => {
+    if (!files || files.length === 0) return;
+  
+    const formData = new FormData();
+    for (const file of Array.from(files)) {
+      formData.append('files[]', file);
+    }
+  
+    await router.post(route('tasks.attachments.upload', taskId), formData, {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.add({
+          severity: "success",
+          summary: "Uploaded",
+          detail: "Files uploaded successfully.",
+          life: 3000,
+        });
+        router.reload();
+      },
+      onError: () => {
+        toast.add({
+          severity: "error",
+          summary: "Upload Failed",
+          detail: "Could not upload files.",
+          life: 3000,
+        });
+      },
+    });
+  };
+  
+  const deleteAttachment = async (taskId: number, attachmentId: number) => {
+    await router.delete(route('tasks.attachments.delete', [taskId, attachmentId]), {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.add({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Attachment removed.",
+          life: 3000,
+        });
+        router.reload();
+      },
+      onError: () => {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to delete attachment.",
+          life: 3000,
+        });
+      },
+    });
+  };
+
   return {
     form,
     isLoading,
@@ -395,6 +504,9 @@ export function useTasks(propsTasks: Task[]) {
     selectedTask,
     showSubtaskModal,
     trashWiggle,
+    priorityFilter,
+    dateFilter,
+    hasAttachmentsFilter,
     triggerWiggle,
     submit,
     updateTasks,
@@ -405,5 +517,7 @@ export function useTasks(propsTasks: Task[]) {
     openSubtaskModal,
     addSubtaskField,
     removeSubtaskField,
+    uploadAttachments,
+    deleteAttachment,
   };
 }

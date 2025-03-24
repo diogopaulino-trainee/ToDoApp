@@ -2,7 +2,6 @@
 import { ref, watchEffect } from "vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import draggable from "vuedraggable";
-import Toast from "primevue/toast";
 import { useTasks, Task } from "@/composables/useTasks";
 import vFocus from '@/directives/vFocus';
 import SubtaskModal from '@/components/SubtaskModal.vue';
@@ -42,6 +41,9 @@ const {
   searchTerm,
   sortBy,
   sortDirection,
+  priorityFilter,
+  dateFilter,
+  hasAttachmentsFilter,
   addSubtaskField,
   removeSubtaskField,
   submit,
@@ -64,7 +66,6 @@ watchEffect(() => {
 
 <template>
   <AppLayout title="To-Do List">
-    <Toast />
     <template #header>
       <div class="flex justify-between items-center">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
@@ -160,27 +161,75 @@ watchEffect(() => {
             </form>
           </transition>
 
-          <!-- Search & Sort -->
-          <div class="mb-6 mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <input
-              v-model="searchTerm"
-              type="text"
-              placeholder="Search tasks..."
-              class="border p-2 rounded w-full md:w-1/2 dark:bg-gray-700 dark:text-white"
-            />
+          <!-- Search, Sort & Filters -->
+          <div class="mb-6 mt-4 flex flex-col gap-4">
 
-            <div class="flex gap-2 items-center">
-              <label class="text-white">Sort by:</label>
-              <select v-model="sortBy" class="border p-2 rounded dark:bg-gray-700 dark:text-white">
-                <option value="due_datetime">Due Date</option>
-                <option value="priority">Priority</option>
-              </select>
-              <button
-                @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
-                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
-              >
-                {{ sortDirection === 'asc' ? 'Asc' : 'Desc' }}
-              </button>
+            <!-- Search input on top -->
+            <div>
+              <input
+                v-model="searchTerm"
+                type="text"
+                placeholder="Search tasks..."
+                class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <!-- Filters and sorting section -->
+            <div class="flex flex-col gap-2 md:flex-row md:justify-between md:items-start">
+
+              <!-- Filters group -->
+              <div class="flex flex-col gap-4 w-full md:flex-row md:flex-wrap md:items-center md:gap-4">
+
+                <!-- Priority Filter -->
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                  <label class="text-white whitespace-nowrap">Priority:</label>
+                  <select v-model="priorityFilter" class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white">
+                    <option value="all">All</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+
+                <!-- Date Filter -->
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                  <label class="text-white whitespace-nowrap">Date:</label>
+                  <select v-model="dateFilter" class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white">
+                    <option value="all">All</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="next_month">Next Month</option>
+                    <option value="after_this_month">After This Month</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
+                </div>
+
+                <!-- Attachments Filter -->
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                  <label class="text-white whitespace-nowrap">Attachments:</label>
+                  <select v-model="hasAttachmentsFilter" class="border p-2 rounded w-full dark:bg-gray-700 dark:text-white">
+                    <option value="all">All</option>
+                    <option value="with">With Attachments</option>
+                    <option value="without">Without Attachments</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Sort section -->
+              <div class="flex gap-2 items-center w-full md:w-auto">
+                <label class="text-white whitespace-nowrap">Sort by:</label>
+                <select v-model="sortBy" class="border p-2 rounded w-full md:w-auto dark:bg-gray-700 dark:text-white">
+                  <option value="due_datetime">Due Date</option>
+                  <option value="priority">Priority</option>
+                </select>
+                <button
+                  @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
+                  class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition w-full md:w-auto"
+                >
+                  {{ sortDirection === 'asc' ? 'Asc' : 'Desc' }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -272,10 +321,23 @@ watchEffect(() => {
                           </span>
                         </div>
                       </div>
-                      <div class="flex justify-end space-x-2 mt-3">
-                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Complete</button>
-                        <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
-                        <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
+                      <div class="flex justify-between items-center space-x-2 mt-3">
+                        <a
+                          :href="route('tasks.show', task.id)"
+                          class="text-cyan-400 hover:text-cyan-600 transition flex items-center gap-1"
+                          title="View Task"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                          <span class="hidden sm:inline">View</span>
+                        </a>
+                        <div class="flex space-x-2">
+                          <button @click="toggleComplete(task)" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Complete</button>
+                          <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                          <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
+                        </div>
                       </div>
                     </div>
                     <hr v-if="index < pendingTasks.length - 1" class="my-2 border-gray-500 dark:border-gray-400 w-11/12 mx-auto"/>
@@ -373,10 +435,23 @@ watchEffect(() => {
                           </span>
                         </div>
                       </div>
-                      <div class="flex justify-end space-x-2 mt-3">
-                        <button @click="toggleComplete(task)" class="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 transition">Undo</button>
-                        <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Delete</button>
-                        <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
+                      <div class="flex justify-between items-center space-x-2 mt-3">
+                        <a
+                          :href="route('tasks.show', task.id)"
+                          class="text-cyan-400 hover:text-cyan-600 transition flex items-center gap-1"
+                          title="View Task"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                          <span class="hidden sm:inline">View</span>
+                        </a>
+                        <div class="flex space-x-2">
+                          <button @click="toggleComplete(task)" class="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 transition">Undo</button>
+                          <button @click="deleteTask(task)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Delete</button>
+                          <button @click="openSubtaskModal(task)" class="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition">Subtasks</button>
+                        </div>
                       </div>
                     </div>
                     <hr v-if="index < completedTasks.length - 1" class="my-2 border-gray-500 dark:border-gray-400 w-11/12 mx-auto"/>

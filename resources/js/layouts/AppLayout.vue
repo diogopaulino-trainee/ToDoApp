@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Head, usePage, Link } from '@inertiajs/vue3';
 import type { BreadcrumbItemType } from '@/types';
 import { ref } from 'vue';
-
+import Toast from 'primevue/toast';
 import { trashWiggle } from '@/stores/wiggleStore';
 
 const triggerTrashWiggle = () => {
@@ -14,7 +14,6 @@ const triggerTrashWiggle = () => {
 };
 
 const csrfToken = usePage().props.csrf_token as string;
-
 
 interface Props {
     title?: string;
@@ -45,6 +44,7 @@ const authUser = computed(() => page.props.auth?.user ?? null);
 
 <template>
     <div class="min-h-screen flex flex-col bg-gradient-to-r from-blue-900 via-blue-800 to-blue-600 animate-gradient bg-[length:200%_200%] text-gray-100">
+        <Toast />
         <Head>
       <meta name="csrf-token" :content="csrfToken" />
       <title>{{ title }}</title>

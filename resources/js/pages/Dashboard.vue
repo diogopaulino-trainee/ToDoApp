@@ -2,6 +2,68 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, usePage, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+
+const page = usePage<{
+  completedCount: number
+  pendingCount: number
+  auth: { user: AuthUser }
+}>()
+
+const user = computed(() => page.props.auth.user)
+const completedTasks = computed(() => page.props.completedCount)
+const pendingTasks = computed(() => page.props.pendingCount)
+
+const chartData = computed(() => ({
+  labels: ['Completed', 'Pending'],
+  datasets: [
+    {
+      label: 'Tasks',
+      data: [completedTasks.value, pendingTasks.value],
+      backgroundColor: ['#10B981', '#3B82F6'],
+      borderRadius: 8,
+      barThickness: 30,
+    },
+  ],
+}))
+
+const chartOptions = {
+  indexAxis: 'y' as const,
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      beginAtZero: true,
+      ticks: {
+        color: '#d1d5db', // Tailwind slate-300
+      },
+    },
+    y: {
+      ticks: {
+        color: '#d1d5db',
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      enabled: true,
+    },
+  },
+}
 
 interface AuthUser {
   id: number;
@@ -19,9 +81,6 @@ interface PageProps {
   };
   [key: string]: unknown;
 }
-
-const page = usePage<PageProps>();
-const user = computed(() => page.props.auth.user);
 </script>
 
 <template>
@@ -82,6 +141,20 @@ const user = computed(() => page.props.auth.user);
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <!-- Chart Card -->
+      <div class="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg shadow hover:shadow-lg transition">
+        <div class="flex items-center gap-2 mb-3 text-indigo-600 dark:text-indigo-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 11V7a4 4 0 018 0v4m-8 4v4a4 4 0 01-8 0v-4m4-6h.01" />
+          </svg>
+          <span class="font-semibold">Task Summary</span>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Overview of your current tasks.</p>
+
+        <div class="relative w-full h-[220px]">
+          <Bar :data="chartData" :options="chartOptions" />
         </div>
       </div>
     </template>

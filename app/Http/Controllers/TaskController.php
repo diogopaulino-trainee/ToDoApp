@@ -14,6 +14,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = auth()->user()->tasks()
+            ->with('attachments')
             ->where('is_deleted', false)
             ->orderBy('due_datetime', 'asc')
             ->orderByRaw("
@@ -120,6 +121,7 @@ class TaskController extends Controller
 
         return Inertia::render('Tasks/RecycleBin', [
             'deletedTasks' => $deletedTasks,
+            'flash' => session()->only(['success', 'error']),
         ]);
     }
 
@@ -130,5 +132,18 @@ class TaskController extends Controller
         $task->update(['is_deleted' => false]);
 
         return redirect()->route('tasks.recycle')->with('success', 'Task restored successfully!');
+    }
+
+    public function show(Task $task)
+    {
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this task.');
+        }
+
+        $task->load(['subtasks', 'attachments']);
+
+        return Inertia::render('Tasks/Show', [
+            'task' => $task,
+        ]);
     }
 }
