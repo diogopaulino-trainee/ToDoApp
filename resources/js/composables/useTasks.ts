@@ -289,12 +289,28 @@ export function useTasks(propsTasks: Task[]) {
     }).patch(route("tasks.update", task.id), {
       preserveScroll: true,
       onSuccess: () => {
-        toast.add({ severity: "success", summary: "Success", detail: "Task updated.", life: 3000 });
+        toast.add({
+          severity: "success",
+          summary: "Success",
+          detail: "Task updated.",
+          life: 3000,
+        });
         isSaving.value = false;
       },
       onError: () => {
-        toast.add({ severity: "error", summary: "Error", detail: "Failed to save changes.", life: 3000 });
-        isSaving.value = false;
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to save changes. The list will update shortly.",
+          life: 3000,
+        });
+        setTimeout(() => {
+          router.visit(route("tasks.index"), {
+            preserveScroll: true,
+            preserveState: false,
+          });
+          isSaving.value = false;
+        }, 3000);
       },
     });
   };

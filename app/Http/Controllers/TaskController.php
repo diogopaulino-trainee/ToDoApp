@@ -40,7 +40,7 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title'       => 'required|string|min:3',
-            'description' => 'required|string|min:3',
+            'description' => 'nullable|string|min:3',
             'priority'    => 'required|in:low,medium,high',
             'due_datetime'    => 'nullable|date|after_or_equal:today',
         ]);
@@ -78,7 +78,7 @@ class TaskController extends Controller
 
         $validated = $request->validate([
             'title'       => 'sometimes|required|string|min:3',
-            'description' => 'sometimes|required|string|min:3',
+            'description' => 'sometimes|nullable|string|min:3',
             'priority'    => 'sometimes|required|in:low,medium,high',
             'due_datetime'    => 'sometimes|nullable|date|after_or_equal:today',
             'completed'   => 'sometimes|boolean',
