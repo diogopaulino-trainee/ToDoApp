@@ -116,6 +116,7 @@ TODOAPP
 
 ## Core Features
 
+- Authenticated user access
 - Create, edit and delete tasks
 - Prioritize tasks (low, medium, high)
 - Set due dates (with past-date validation)
@@ -123,7 +124,9 @@ TODOAPP
 - Upload and remove file attachments
 - Toggle and manage subtasks
 - Recycle bin and task recovery
-- Authenticated user access
+- AI Assistant (Chatbot) for instant support, quick links, and motivational messages
+- Help & Motivation Page with FAQs, productivity tips, a mood switcher, and an interactive quiz
+- Pomodoro Timer** to enhance focus with work/break intervals
 - Fully tested with PHPUnit
 
 ---

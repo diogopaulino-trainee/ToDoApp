@@ -19,6 +19,10 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
+Route::get('/help', function () {
+    return Inertia::render('Help');
+})->name('help');
+
 Route::get('/dashboard', function () {
     $user = Auth::user();
 

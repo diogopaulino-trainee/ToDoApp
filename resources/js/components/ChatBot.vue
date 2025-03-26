@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
         <button
             @click.stop="store.openChat"
             v-if="!store.isOpen"
-            class="fixed bottom-16 right-6 h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+            class="fixed bottom-20 right-6 h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700"
             title="Open Assistant"
         >
             💬
@@ -92,7 +92,7 @@ onBeforeUnmount(() => {
         <div
             v-if="store.isOpen"
             id="chat-box"
-            class="fixed bottom-16 right-6 w-80 rounded-lg border border-gray-300 bg-white text-gray-900 shadow-lg"
+            class="fixed bottom-20 right-6 w-80 rounded-lg border border-gray-300 bg-white text-gray-900 shadow-lg"
         >
             <!-- Chat header with title, toggle, help, and close -->
             <div class="relative flex items-center justify-between rounded-t-lg bg-blue-600 p-3 font-bold text-white">

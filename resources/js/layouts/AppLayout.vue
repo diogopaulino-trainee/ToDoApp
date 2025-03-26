@@ -1,10 +1,22 @@
 <script setup lang="ts">
 import ChatBot from '@/components/ChatBot.vue';
+import { usePomodoro } from '@/composables/pomodoro';
 import { trashWiggle } from '@/stores/wiggleStore';
 import type { BreadcrumbItemType } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Timer } from 'lucide-vue-next';
 import Toast from 'primevue/toast';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+const { formattedTime, isPomodoroFinished, isPomodoroRunning, resetPomodoro, startPomodoro } = usePomodoro();
+
+watch(isPomodoroFinished, (newVal) => {
+    if (newVal) {
+        setTimeout(() => {
+            isPomodoroFinished.value = false;
+        }, 10000);
+    }
+});
 
 const triggerTrashWiggle = () => {
     trashWiggle.value = true;
@@ -40,6 +52,18 @@ interface InertiaProps {
 
 const page = usePage<InertiaProps>();
 const authUser = computed(() => page.props.auth?.user ?? null);
+
+const showPomodoroDropdown = ref(false);
+const selectedMinutes = ref<number>(25);
+
+function startPomodoroTimer() {
+    startPomodoro(selectedMinutes.value);
+    showPomodoroDropdown.value = false;
+}
+
+function resetPomodoroTimer() {
+    resetPomodoro();
+}
 </script>
 
 <template>
@@ -115,7 +139,6 @@ const authUser = computed(() => page.props.auth?.user ?? null);
                             <line x1="14" x2="14" y1="11" y2="17" />
                         </svg>
                     </Link>
-
                     <Link
                         v-if="authUser"
                         :href="route('logout')"
@@ -154,10 +177,53 @@ const authUser = computed(() => page.props.auth?.user ?? null);
                     >
                         Register
                     </Link>
+
+                    <div class="flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+                        <button
+                            @click="showPomodoroDropdown = !showPomodoroDropdown"
+                            class="group relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-700 shadow-lg ring-1 ring-purple-500 ring-offset-2 ring-offset-gray-900 transition-transform hover:scale-105 hover:bg-purple-800"
+                            title="Pomodoro Timer"
+                        >
+                            <Timer class="h-5 w-5 text-white" />
+                        </button>
+
+                        <div
+                            v-if="showPomodoroDropdown"
+                            class="absolute left-1/2 top-24 w-48 origin-top -translate-x-1/2 rounded-md bg-white p-4 text-gray-800 shadow-lg md:top-16"
+                        >
+                            <label class="block text-sm font-semibold">Select Minutes:</label>
+                            <select v-model="selectedMinutes" class="mt-1 block w-full rounded border border-gray-300 bg-white p-1 text-sm">
+                                <option value="0.0833">5 Seconds (test)</option>
+                                <option value="5">5 Minutes</option>
+                                <option value="10">10 Minutes</option>
+                                <option value="15">15 Minutes</option>
+                                <option value="25">25 Minutes</option>
+                                <option value="30">30 Minutes</option>
+                            </select>
+                            <button
+                                @click="startPomodoroTimer"
+                                class="mt-3 w-full rounded bg-green-500 py-1 text-white transition hover:bg-green-600"
+                            >
+                                Start
+                            </button>
+                            <button @click="resetPomodoroTimer" class="mt-2 w-full rounded bg-red-500 py-1 text-white transition hover:bg-red-600">
+                                Reset
+                            </button>
+                        </div>
+
+                        <div v-if="isPomodoroRunning" class="ml-3 rounded bg-gray-200 px-2 py-1 text-sm font-semibold text-gray-800 shadow">
+                            {{ formattedTime }}
+                        </div>
+                    </div>
                 </nav>
 
                 <!-- Bottom animated border -->
                 <div class="animate-border absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-blue-400 via-green-400 to-purple-500"></div>
+            </div>
+
+            <!-- Notification banner when Pomodoro finishes -->
+            <div v-if="isPomodoroFinished" class="absolute left-0 right-0 top-full bg-yellow-500 p-2 text-center text-white">
+                Plim! Time is up! Take a break.
             </div>
         </header>
 
@@ -173,7 +239,46 @@ const authUser = computed(() => page.props.auth?.user ?? null);
         <!-- FIXED FOOTER WITH ANIMATED TOP BORDER -->
         <footer class="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 py-4 text-center text-sm text-white shadow-inner">
             <div class="animate-border absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-indigo-400 via-blue-400 to-sky-500"></div>
-            Stay organized with <span class="font-semibold text-blue-300">To-Do App</span> – Your tasks, your way!
+            <span>
+                Stay organized with
+                <span class="font-semibold text-blue-300">To-Do App</span>
+                – Your tasks, your way!
+            </span>
+            <br />
+            <Link :href="route('help')" class="text-blue-400 underline hover:text-blue-200">Need help?</Link>
         </footer>
     </div>
 </template>
+
+<style scoped>
+.animate-gradient {
+    animation: gradientBG 8s ease infinite alternate;
+    background-size: 200% 200%;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-border {
+    animation: borderGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes borderGlow {
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+</style>

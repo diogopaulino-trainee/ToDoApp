@@ -74,7 +74,7 @@ watchEffect(() => {
 
         <div class="py-12">
             <div class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white p-6 shadow-xl sm:rounded-lg dark:bg-gray-800">
+                <div class="neon-wrapper overflow-hidden bg-white p-6 shadow-xl sm:rounded-lg dark:bg-gray-800">
                     <div class="mb-6 flex justify-center">
                         <button
                             @click="showForm = !showForm"
