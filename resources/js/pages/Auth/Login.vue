@@ -1,10 +1,10 @@
 <script setup>
 import Checkbox from '@/components/Checkbox.vue';
-import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/components/InputError.vue';
 import InputLabel from '@/components/InputLabel.vue';
 import PrimaryButton from '@/components/PrimaryButton.vue';
 import TextInput from '@/components/TextInput.vue';
+import GuestLayout from '@/layouts/GuestLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -77,18 +77,14 @@ const submit = () => {
                     <span class="ml-2 text-white">Remember me</span>
                 </label>
 
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="text-sm text-blue-400 hover:text-blue-300"
-                >
+                <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm text-blue-400 hover:text-blue-300">
                     Forgot your password?
                 </Link>
             </div>
 
             <div class="flex items-center justify-end">
                 <PrimaryButton
-                    class="w-full bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-700 dark:hover:bg-blue-600"
+                    class="w-full rounded bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >

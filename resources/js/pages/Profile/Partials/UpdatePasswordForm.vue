@@ -36,14 +36,9 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Update Password
-            </h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Update Password</h2>
 
-            <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                Ensure your account is using a long, random password to stay
-                secure.
-            </p>
+            <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">Ensure your account is using a long, random password to stay secure.</p>
         </header>
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
@@ -55,7 +50,7 @@ const updatePassword = () => {
                     ref="currentPasswordInput"
                     v-model="form.current_password"
                     type="password"
-                    class="mt-1 block w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    class="mt-1 block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     autocomplete="current-password"
                 />
 
@@ -70,7 +65,7 @@ const updatePassword = () => {
                     ref="passwordInput"
                     v-model="form.password"
                     type="password"
-                    class="mt-1 block w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    class="mt-1 block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     autocomplete="new-password"
                 />
 
@@ -84,7 +79,7 @@ const updatePassword = () => {
                     id="password_confirmation"
                     v-model="form.password_confirmation"
                     type="password"
-                    class="mt-1 block w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    class="mt-1 block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     autocomplete="new-password"
                 />
 
@@ -92,14 +87,15 @@ const updatePassword = () => {
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton class="bg-blue-600 hover:bg-blue-700 text-white" :disabled="form.processing">
-                    Save
-                </PrimaryButton>
+                <PrimaryButton class="bg-blue-600 text-white hover:bg-blue-700" :disabled="form.processing"> Save </PrimaryButton>
 
-                <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0" leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
-                    <p v-if="form.recentlySuccessful" class="text-sm text-green-500 dark:text-green-400">
-                        Saved.
-                    </p>
+                <Transition
+                    enter-active-class="transition ease-in-out"
+                    enter-from-class="opacity-0"
+                    leave-active-class="transition ease-in-out"
+                    leave-to-class="opacity-0"
+                >
+                    <p v-if="form.recentlySuccessful" class="text-sm text-green-500 dark:text-green-400">Saved.</p>
                 </Transition>
             </div>
         </form>

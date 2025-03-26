@@ -1,8 +1,8 @@
 <script setup>
-import { computed } from 'vue';
-import GuestLayout from '@/layouts/GuestLayout.vue';
 import PrimaryButton from '@/components/PrimaryButton.vue';
+import GuestLayout from '@/layouts/GuestLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({
     status: {
@@ -16,9 +16,7 @@ const submit = () => {
     form.post(route('verification.send'));
 };
 
-const verificationLinkSent = computed(
-    () => props.status === 'verification-link-sent',
-);
+const verificationLinkSent = computed(() => props.status === 'verification-link-sent');
 </script>
 
 <template>
@@ -26,27 +24,17 @@ const verificationLinkSent = computed(
         <Head title="Email Verification" />
 
         <div class="mb-4 text-sm text-gray-600">
-            Thanks for signing up! Before getting started, could you verify your
-            email address by clicking on the link we just emailed to you? If you
+            Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you
             didn't receive the email, we will gladly send you another.
         </div>
 
-        <div
-            class="mb-4 text-sm font-medium text-green-600"
-            v-if="verificationLinkSent"
-        >
-            A new verification link has been sent to the email address you
-            provided during registration.
+        <div class="mb-4 text-sm font-medium text-green-600" v-if="verificationLinkSent">
+            A new verification link has been sent to the email address you provided during registration.
         </div>
 
         <form @submit.prevent="submit">
             <div class="mt-4 flex items-center justify-between">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Resend Verification Email
-                </PrimaryButton>
+                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing"> Resend Verification Email </PrimaryButton>
 
                 <Link
                     :href="route('logout')"
