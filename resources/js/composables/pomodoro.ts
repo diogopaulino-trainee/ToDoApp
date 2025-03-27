@@ -99,6 +99,11 @@ export function usePomodoro() {
         }
     });
 
+    /**
+     * Returns the Pomodoro timer state and methods.
+     *
+     * @returns Object containing Pomodoro timer state and methods
+     */
     return {
         pomodoroMinutes,
         remainingTime,

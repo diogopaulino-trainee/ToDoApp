@@ -50,4 +50,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Task::class);
     }
+
+    public function levels() {
+        return $this->belongsToMany(Level::class, 'user_levels')
+                    ->withPivot('animation_seen')
+                    ->withTimestamps();
+    }
 }

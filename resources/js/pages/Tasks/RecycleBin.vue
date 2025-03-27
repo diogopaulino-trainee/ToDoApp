@@ -5,16 +5,38 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
+/**
+ * Define the props.
+ */
 const props = defineProps<{
     deletedTasks: Task[];
 }>();
 
+/**
+ * Define the selectedTaskId ref.
+ */
 const selectedTaskId = ref<number | null>(null);
+
+/**
+ * Define the selectedTaskTitle ref.
+ */
 const selectedTaskTitle = ref<string>('');
+
+/**
+ * Define the showModal ref.
+ */
 const showModal = ref(false);
 
+/**
+ * Define the restoringTaskId ref.
+ */
 const restoringTaskId = ref<number | null>(null);
 
+/**
+ * Define the restoreTask function.
+ *
+ * @param id - The id of the task to restore.
+ */
 const restoreTask = (id: number) => {
     restoringTaskId.value = id;
 
@@ -29,6 +51,11 @@ const restoreTask = (id: number) => {
     }, 300);
 };
 
+/**
+ * Define the openModal function.
+ *
+ * @param task - The task to open the modal for.
+ */
 const openModal = (task: Task) => {
     selectedTaskId.value = task.id;
     selectedTaskTitle.value = task.title;

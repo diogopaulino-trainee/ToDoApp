@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\Level;
+use App\Models\UserLevel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,6 +12,8 @@ class TaskController extends Controller
 {
     /**
      * Display a listing of the user's tasks, ordered by due date and priority.
+     *
+     * @return \Inertia\Response
      */
     public function index()
     {
@@ -35,6 +39,9 @@ class TaskController extends Controller
 
     /**
      * Store a newly created task in the database.
+     *
+     * @param Request $request The request object.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -69,6 +76,10 @@ class TaskController extends Controller
      * Update the specified task.
      * 
      * If the "completed" status is updated, all related subtasks will be updated accordingly.
+     *
+     * @param Request $request The request object.
+     * @param Task $task The task to update.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Task $task)
     {
@@ -86,12 +97,37 @@ class TaskController extends Controller
 
         try {
             $task->update($validated);
-
-            // Sync subtasks if task completion status was updated
+    
             if (array_key_exists('completed', $validated)) {
                 $task->subtasks()->update(['completed' => $validated['completed']]);
+    
+                if ($validated['completed']) {
+                    $completedCount = Task::where('user_id', auth()->id())
+                        ->where('completed', true)
+                        ->where('is_deleted', false)
+                        ->count();
+    
+                    $newLevel = Level::where('required_tasks', '<=', $completedCount)
+                        ->orderByDesc('required_tasks')
+                        ->first();
+    
+                    if ($newLevel) {
+                        $userLevel = UserLevel::firstOrNew(['user_id' => auth()->id()]);
+                        $previousLevelId = $userLevel->level_id;
+    
+                        if ($userLevel->level_id !== $newLevel->id) {
+                            $userLevel->level_id = $newLevel->id;
+                            $userLevel->save();
+    
+                            return redirect()
+                                ->route('tasks.index')
+                                ->with('success', "🎉 Congrats! You've reached {$newLevel->name}!")
+                                ->with('newLevel', $newLevel);
+                        }
+                    }
+                }
             }
-
+    
             return redirect()->route('tasks.index')->with('success', 'Task updated successfully!');
         } catch (\Exception $e) {
             return redirect()->route('tasks.index')->with('error', 'Failed to update task.');
@@ -100,6 +136,9 @@ class TaskController extends Controller
 
     /**
      * Remove the specified task from the database.
+     *
+     * @param Task $task The task to delete.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Task $task)
     {
@@ -115,6 +154,11 @@ class TaskController extends Controller
         }
     }
 
+    /**
+     * Display the Recycle Bin.
+     *
+     * @return \Inertia\Response
+     */
     public function recycleBin()
     {
         $deletedTasks = auth()->user()->tasks()->where('is_deleted', true)->get();
@@ -125,6 +169,12 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * Restore a task from the Recycle Bin.
+     *
+     * @param int $id The ID of the task to restore.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function restore($id)
     {
         $task = Task::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
@@ -134,6 +184,12 @@ class TaskController extends Controller
         return redirect()->route('tasks.recycle')->with('success', 'Task restored successfully!');
     }
 
+    /**
+     * Display a specific task.
+     *
+     * @param Task $task The task to display.
+     * @return \Inertia\Response
+     */
     public function show(Task $task)
     {
         if ($task->user_id !== auth()->id()) {

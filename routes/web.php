@@ -4,11 +4,16 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TaskController;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Level;
 use App\Models\Task;
+use App\Models\UserLevel;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -26,13 +31,30 @@ Route::get('/help', function () {
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
-    $completed = Task::where('user_id', $user->id)->where('completed', true)->count();
-    $pending = Task::where('user_id', $user->id)->where('completed', false)->count();
+    $completed = Task::where('user_id', $user->id)->where('completed', true)->where('is_deleted', false)->count();
+    $pending = Task::where('user_id', $user->id)->where('completed', false)->where('is_deleted', false)->count();
+
+    $userLevel = UserLevel::where('user_id', $user->id)->first();
+    $currentLevel = $userLevel?->level;
+    $allLevels = Level::orderBy('required_tasks')->get();
+
+    $showConfetti = false;
+
+    if ($userLevel && !$userLevel->animation_seen) {
+        $showConfetti = true;
+        $userLevel->animation_seen = true;
+        $userLevel->save();
+    }
 
     return Inertia::render('Dashboard', [
+        'auth' => ['user' => $user],
         'completedCount' => $completed,
         'pendingCount' => $pending,
+        'currentLevel' => $currentLevel,
+        'levels' => $allLevels,
+        'showConfetti' => $showConfetti,
     ]);
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -59,6 +81,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/tasks/{task}/subtasks', function (Task $task) {
         return $task->subtasks;
     });
+
+    Route::post('/level/seen', function (Request $request) {
+        $user = Auth::user();
+        $levelId = $request->input('level_id');
+    
+        $userLevel = \App\Models\UserLevel::where('user_id', $user->id)
+            ->where('level_id', $levelId)
+            ->first();
+    
+        if ($userLevel && !$userLevel->animation_seen) {
+            $userLevel->animation_seen = true;
+            $userLevel->save();
+        }
+    
+        return response()->json(['message' => 'Animation marked as seen']);
+    })->name('level.markAsSeen');
 });
 
 require __DIR__.'/auth.php';

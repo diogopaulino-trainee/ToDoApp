@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class SubTaskController extends Controller
 {
+    /**
+     * Store a new subtask.
+     *
+     * @param Request $request The request object.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -27,6 +33,13 @@ class SubTaskController extends Controller
         return response()->json($created);
     }
 
+    /**
+     * Update a subtask.
+     *
+     * @param Request $request The request object.
+     * @param SubTask $subtask The subtask to update.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, SubTask $subtask)
     {
         $request->validate([
@@ -38,12 +51,24 @@ class SubTaskController extends Controller
         return response()->json($subtask);
     }
 
+    /**
+     * Delete a subtask.
+     *
+     * @param SubTask $subtask The subtask to delete.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(SubTask $subtask)
     {
         $subtask->delete();
         return response()->json(['message' => 'Subtask deleted successfully']);
     }
 
+    /**
+     * Toggle a subtask.
+     *
+     * @param SubTask $subtask The subtask to toggle.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function toggle(SubTask $subtask)
     {
         $subtask->update([

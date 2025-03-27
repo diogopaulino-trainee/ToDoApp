@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
         <button
             @click.stop="store.openChat"
             v-if="!store.isOpen"
-            class="fixed bottom-20 right-6 h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+            class="fixed bottom-20 right-6 h-14 w-14 transform rounded-full bg-blue-600 text-white shadow-lg ring-1 ring-blue-500 ring-offset-2 ring-offset-blue-900 transition hover:scale-105 hover:bg-blue-700"
             title="Open Assistant"
         >
             💬

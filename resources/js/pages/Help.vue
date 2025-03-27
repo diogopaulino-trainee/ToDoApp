@@ -4,257 +4,521 @@ import { Head } from '@inertiajs/vue3';
 import { BookOpenCheck, Brain, Coffee, ExternalLink, HelpCircle, Lightbulb, ListChecks, Target, Timer, Zap } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
+/**
+ * Define the Tip interface.
+ */
 interface Tip {
     text: string;
     icon: any;
     explanation: string;
 }
 
+/**
+ * Define the QuizOption interface.
+ */
 interface QuizOption {
     text: string;
     value: 'sprint' | 'zen' | 'deadline' | 'collaborative' | 'creative' | 'analytical' | 'perfectionist' | 'adaptive' | 'proactive' | 'laidBack';
 }
 
+/**
+ * Define the QuizQuestion interface.
+ */
 interface QuizQuestion {
     question: string;
     options: QuizOption[];
 }
 
+/**
+ * Define the allTips array.
+ */
 const allTips: Tip[] = [
     {
+        /**
+         * Define the first tip.
+         */
         text: 'Break tasks into manageable steps to stay focused.',
         icon: Lightbulb,
         explanation: 'Divide large tasks into 2–4 smaller subtasks. This reduces overwhelm and gives a sense of progress with each small win.',
     },
     {
+        /**
+         * Define the second tip.
+         */
         text: 'Use the Pomodoro technique to boost energy and focus.',
         icon: Timer,
         explanation:
             'Set a timer for 25 minutes of work followed by a 5-minute break. After 4 cycles, take a longer break. This keeps your brain fresh.',
     },
     {
+        /**
+         * Define the third tip.
+         */
         text: 'Clear your workspace — clear your thoughts.',
         icon: Brain,
         explanation: 'A clutter-free desk helps reduce cognitive distractions. Put away unused items before starting work.',
     },
     {
+        /**
+         * Define the fourth tip.
+         */
         text: 'Take mindful breaks — a short pause improves clarity.',
         icon: Coffee,
         explanation: 'Step away from your screen every hour. Stretch, breathe, or take a short walk to reset your focus.',
     },
     {
+        /**
+         * Define the fifth tip.
+         */
         text: 'Start with your top priority each day.',
         icon: Target,
         explanation: 'Each morning, choose your “main mission.” Completing it early builds momentum for the rest of the day.',
     },
     {
+        /**
+         * Define the sixth tip.
+         */
         text: 'Celebrate small wins. They build long-term momentum.',
         icon: ListChecks,
         explanation: 'Reward yourself after finishing tasks — even small ones. Motivation grows through consistent recognition.',
     },
     {
+        /**
+         * Define the seventh tip.
+         */
         text: 'Avoid multitasking. Focus on one task at a time.',
         icon: Brain,
         explanation: 'Multitasking reduces productivity. Focused attention leads to better results.',
     },
     {
+        /**
+         * Define the eighth tip.
+         */
         text: 'Use deadlines to create urgency.',
         icon: Timer,
         explanation: 'Even artificial deadlines push you to finish tasks faster and avoid procrastination.',
     },
     {
+        /**
+         * Define the ninth tip.
+         */
         text: 'Declutter digital space.',
         icon: Coffee,
         explanation: 'Organize your folders and close unused tabs. A clean screen means a clean mind.',
     },
     {
+        /**
+         * Define the tenth tip.
+         */
         text: 'Track your energy levels.',
         icon: Zap,
         explanation: 'Find your peak hours and schedule your most important tasks then.',
     },
     {
+        /**
+         * Define the eleventh tip.
+         */
         text: 'Use checklists to reduce mental load.',
         icon: ListChecks,
         explanation: 'Checking off tasks creates a sense of accomplishment and keeps you focused.',
     },
     {
+        /**
+         * Define the twelfth tip.
+         */
         text: 'Review your goals weekly.',
         icon: Lightbulb,
         explanation: 'Spend 10 minutes reviewing what went well and what needs adjustment.',
     },
 ];
 
+/**
+ * Define the showAllTips ref.
+ */
 const showAllTips = ref(false);
+
+/**
+ * Define the displayedTips computed property.
+ */
 const displayedTips = computed(() => (showAllTips.value ? allTips : allTips.slice(0, 6)));
+
+/**
+ * Define the toggleTips function.
+ */
 const toggleTips = () => (showAllTips.value = !showAllTips.value);
 
+/**
+ * Define the expandedIndex ref.
+ */
 const expandedIndex = ref<number | null>(null);
+
+/**
+ * Define the toggleExpand function.
+ */
 function toggleExpand(index: number) {
     expandedIndex.value = expandedIndex.value === index ? null : index;
 }
 
+/**
+ * Define the faqs array.
+ */
 const faqs = [
     {
+        /**
+         * Define the first faq.
+         */
         q: 'How does the AI Assistant work?',
         a: "It detects keywords like 'tasks', 'profile', or 'dashboard' and responds with links, tips, or motivation.",
     },
     {
+        /**
+         * Define the second faq.
+         */
         q: 'Can I customize or reorder my tasks?',
         a: 'Yes! You can freely add, edit, mark as done, or reorder your tasks.',
     },
     {
+        /**
+         * Define the third faq.
+         */
         q: 'What happens if I close the browser?',
         a: 'Your tasks and progress are saved automatically in your account.',
     },
     {
+        /**
+         * Define the fourth faq.
+         */
         q: 'How do I deal with burnout?',
         a: 'Try the 20-20-20 rule, and allow moments of silence. Don’t hesitate to pause — progress needs balance.',
     },
     {
+        /**
+         * Define the fifth faq.
+         */
         q: 'Can this tool help with academic or personal projects?',
         a: 'Absolutely. Plan project phases as tasks, and let the assistant keep you motivated and on track.',
     },
     {
+        /**
+         * Define the sixth faq.
+         */
         q: 'Is there a mobile version?',
         a: 'Yes! The app is fully responsive and can be used on phones and tablets.',
     },
     {
+        /**
+         * Define the seventh faq.
+         */
         q: 'Can I collaborate with others?',
         a: 'Collaborative features are planned for future updates. Stay tuned!',
     },
 ];
 
+/**
+ * Define the resources array.
+ */
 const resources = [
-    { label: 'Todoist Blog (Planning Tips)', url: 'https://blog.todoist.com/' },
     {
+        /**
+         * Define the first resource.
+         */
+        label: 'Todoist Blog (Planning Tips)',
+        url: 'https://blog.todoist.com/',
+    },
+    {
+        /**
+         * Define the second resource.
+         */
         label: 'Notion Templates for Students',
         url: 'https://www.notion.so/templates/students',
     },
-    { label: 'Pomofocus (Free Pomodoro Timer)', url: 'https://pomofocus.io/' },
-    { label: 'Mindfulness Exercises (Calm)', url: 'https://www.calm.com/' },
     {
+        /**
+         * Define the third resource.
+         */
+        label: 'Pomofocus (Free Pomodoro Timer)',
+        url: 'https://pomofocus.io/',
+    },
+    {
+        /**
+         * Define the fourth resource.
+         */
+        label: 'Mindfulness Exercises (Calm)',
+        url: 'https://www.calm.com/',
+    },
+    {
+        /**
+         * Define the fifth resource.
+         */
         label: 'Mental Health & Focus Guide',
         url: 'https://www.headspace.com/mindfulness',
     },
 ];
 
+/**
+ * Define the moods array.
+ */
 const moods = [
-    { label: 'Stressed', value: 'stressed' },
-    { label: 'Focused', value: 'focused' },
-    { label: 'Tired', value: 'tired' },
-    { label: 'Relaxed', value: 'relaxed' },
-    { label: 'Overwhelmed', value: 'overwhelmed' },
-    { label: 'Motivated', value: 'motivated' },
-    { label: 'Bored', value: 'bored' },
-    { label: 'Procrastinating', value: 'procrastinating' },
-    { label: 'Energized', value: 'energized' },
-    { label: 'Calm', value: 'calm' },
+    {
+        /**
+         * Define the first mood.
+         */
+        label: 'Stressed',
+        value: 'stressed',
+    },
+    {
+        /**
+         * Define the second mood.
+         */
+        label: 'Focused',
+        value: 'focused',
+    },
+    {
+        /**
+         * Define the third mood.
+         */
+        label: 'Tired',
+        value: 'tired',
+    },
+    {
+        /**
+         * Define the fourth mood.
+         */
+        label: 'Relaxed',
+        value: 'relaxed',
+    },
+    {
+        /**
+         * Define the fifth mood.
+         */
+        label: 'Overwhelmed',
+        value: 'overwhelmed',
+    },
+    {
+        /**
+         * Define the sixth mood.
+         */
+        label: 'Motivated',
+        value: 'motivated',
+    },
+    {
+        /**
+         * Define the seventh mood.
+         */
+        label: 'Bored',
+        value: 'bored',
+    },
+    {
+        /**
+         * Define the eighth mood.
+         */
+        label: 'Procrastinating',
+        value: 'procrastinating',
+    },
+    {
+        /**
+         * Define the ninth mood.
+         */
+        label: 'Energized',
+        value: 'energized',
+    },
+    {
+        /**
+         * Define the tenth mood.
+         */
+        label: 'Calm',
+        value: 'calm',
+    },
 ];
 
+/**
+ * Define the currentMood ref.
+ */
 const currentMood = ref<string>('focused');
 
+/**
+ * Define the moodSuggestions object.
+ */
 const moodSuggestions: Record<string, { phrase: string; tip: string }> = {
     stressed: {
+        /**
+         * Define the first mood suggestion.
+         */
         phrase: 'Take a deep breath. One step at a time can overcome anything.',
         tip: 'Try a quick 5-minute meditation or go for a short walk to clear your head.',
     },
     focused: {
+        /**
+         * Define the second mood suggestion.
+         */
         phrase: 'Use this focus to tackle your most important tasks!',
         tip: 'Set clear goals and keep up the momentum with brief, regular breaks.',
     },
     tired: {
+        /**
+         * Define the third mood suggestion.
+         */
         phrase: 'Rest is crucial for productivity. Recharge to come back stronger.',
         tip: 'Take a short break, drink water, or do light stretches to wake up.',
     },
     relaxed: {
+        /**
+         * Define the fourth mood suggestion.
+         */
         phrase: 'A calm state is perfect for planning and reflection.',
         tip: 'Review your tasks and outline a smooth plan for the week.',
     },
     overwhelmed: {
+        /**
+         * Define the fifth mood suggestion.
+         */
         phrase: 'Break down tasks and prioritize. You can handle this step by step.',
         tip: 'List out tasks in small chunks and celebrate each small completion.',
     },
     motivated: {
+        /**
+         * Define the sixth mood suggestion.
+         */
         phrase: 'Your motivation is high! Channel it into tasks you’ve been putting off.',
         tip: 'Focus on key goals and ride this wave of inspiration to make real progress.',
     },
     bored: {
+        /**
+         * Define the seventh mood suggestion.
+         */
         phrase: 'Try switching up your routine or environment to spark interest.',
         tip: 'Add a creative twist to your tasks or set mini-challenges to stay engaged.',
     },
     procrastinating: {
+        /**
+         * Define the eighth mood suggestion.
+         */
         phrase: 'Recognize the delay and take one small action to start moving forward.',
         tip: 'Use a timer to push through the first few minutes; momentum will build naturally.',
     },
     energized: {
+        /**
+         * Define the ninth mood suggestion.
+         */
         phrase: 'You have plenty of energy—put it to good use!',
         tip: 'Tackle high-effort tasks now, and consider helping others or learning new skills.',
     },
     calm: {
+        /**
+         * Define the tenth mood suggestion.
+         */
         phrase: 'Perfect time for steady, thoughtful progress.',
         tip: 'Maintain this peaceful mindset by avoiding distractions and planning breaks.',
     },
 };
 
+/**
+ * Define the quizQuestions array.
+ */
 const quizQuestions: QuizQuestion[] = [
     {
+        /**
+         * Define the first question.
+         */
         question: '1) How do you typically begin your workday?',
         options: [
             {
+                /**
+                 * Define the first option.
+                 */
                 text: 'Dive in and try to complete tasks quickly (Sprint).',
                 value: 'sprint',
             },
             {
+                /**
+                 * Define the second option.
+                 */
                 text: 'Set a calm environment before starting (Zen).',
                 value: 'zen',
             },
             {
+                /**
+                 * Define the third option.
+                 */
                 text: 'Check deadlines and focus on urgent tasks (Deadline).',
                 value: 'deadline',
             },
             {
+                /**
+                 * Define the fourth option.
+                 */
                 text: 'Coordinate with others to align efforts (Collaborative).',
                 value: 'collaborative',
             },
         ],
     },
     {
+        /**
+         * Define the second question.
+         */
         question: '2) When a big project appears, how do you handle it?',
         options: [
             {
+                /**
+                 * Define the first option.
+                 */
                 text: 'Break it down and go fast in short bursts (Sprint).',
                 value: 'sprint',
             },
             {
+                /**
+                 * Define the second option.
+                 */
                 text: 'Stay calm and maintain a steady pace (Zen).',
                 value: 'zen',
             },
             {
+                /**
+                 * Define the third option.
+                 */
                 text: 'Set deadlines and work backward (Deadline).',
                 value: 'deadline',
             },
             {
+                /**
+                 * Define the fourth option.
+                 */
                 text: 'Brainstorm with others for shared solutions (Collaborative).',
                 value: 'collaborative',
             },
         ],
     },
     {
+        /**
+         * Define the third question.
+         */
         question: '3) How do you feel most accomplished?',
         options: [
             {
+                /**
+                 * Define the first option.
+                 */
                 text: 'When I finish tasks ahead of time (Proactive).',
                 value: 'proactive',
             },
             {
+                /**
+                 * Define the second option.
+                 */
                 text: 'When I reach a calm, productive flow (Zen).',
                 value: 'zen',
             },
             {
+                /**
+                 * Define the third option.
+                 */
                 text: 'When I meet or beat crucial deadlines (Deadline).',
                 value: 'deadline',
             },
             {
+                /**
+                 * Define the fourth option.
+                 */
                 text: 'When I generate unique or creative solutions (Creative).',
                 value: 'creative',
             },
@@ -262,17 +526,38 @@ const quizQuestions: QuizQuestion[] = [
     },
 ];
 
+/**
+ * Define the quizAnswers ref.
+ */
 const quizAnswers = ref<(QuizOption['value'] | null)[]>(quizQuestions.map(() => null));
 
+/**
+ * Define the allAnswered computed property.
+ */
 const allAnswered = computed(() => quizAnswers.value.every((answer) => answer !== null));
 
+/**
+ * Define the quizResult ref.
+ */
 const quizResult = ref<QuizOption['value'] | null>(null);
 
+/**
+ * Define the calculateQuizResult function.
+ */
 function calculateQuizResult() {
+    /**
+     * If the quiz is not all answered, return.
+     */
     if (!allAnswered.value) return;
 
+    /**
+     * Define the question weights.
+     */
     const questionWeights = [3, 2, 1];
 
+    /**
+     * Define the weighted tally.
+     */
     const weightedTally: Record<QuizOption['value'], number> = {
         sprint: 0,
         zen: 0,
@@ -286,6 +571,9 @@ function calculateQuizResult() {
         laidBack: 0,
     };
 
+    /**
+     * Define the weighted tally.
+     */
     quizAnswers.value.forEach((answer, index) => {
         if (answer) {
             weightedTally[answer] += questionWeights[index];
@@ -293,6 +581,7 @@ function calculateQuizResult() {
     });
 
     let maxType: QuizOption['value'] = 'sprint';
+
     let maxScore = 0;
     for (const type in weightedTally) {
         if (weightedTally[type as QuizOption['value']] > maxScore) {
@@ -304,49 +593,85 @@ function calculateQuizResult() {
     quizResult.value = maxType;
 }
 
+/**
+ * Define the productivityStyles object.
+ */
 const productivityStyles: Record<QuizOption['value'], { title: string; description: string }> = {
     sprint: {
+        /**
+         * Define the first productivity style.
+         */
         title: 'Sprint-Focused',
         description: 'You love speed and finishing tasks fast. Remember to balance with breaks to avoid burnout.',
     },
     zen: {
+        /**
+         * Define the second productivity style.
+         */
         title: 'Zen-Flow',
         description: 'You prefer a calm, steady flow. Keep a peaceful environment and guard against distractions.',
     },
     deadline: {
+        /**
+         * Define the third productivity style.
+         */
         title: 'Deadline-Driven',
         description: 'You work best under time pressure. Plan carefully to reduce stress and meet those deadlines.',
     },
     collaborative: {
+        /**
+         * Define the fourth productivity style.
+         */
         title: 'Collaborative',
         description: 'You thrive by working with others. Sharing ideas and responsibilities is your strength.',
     },
     creative: {
+        /**
+         * Define the fifth productivity style.
+         */
         title: 'Creative',
         description: 'You excel in generating innovative ideas. Keep exploring new angles and solutions.',
     },
     analytical: {
+        /**
+         * Define the sixth productivity style.
+         */
         title: 'Analytical',
         description: 'You rely on logic and data. Systematic thinking helps you produce accurate results.',
     },
     perfectionist: {
+        /**
+         * Define the seventh productivity style.
+         */
         title: 'Perfectionist',
         description: 'You aim for flawless outcomes. Don’t forget to balance time and avoid overthinking.',
     },
     adaptive: {
+        /**
+         * Define the eighth productivity style.
+         */
         title: 'Adaptive',
         description: 'You adjust quickly to new situations. Flexibility is your key strength.',
     },
     proactive: {
+        /**
+         * Define the ninth productivity style.
+         */
         title: 'Proactive',
         description: 'You stay ahead of the curve. Tackling tasks early helps you avoid last-minute rushes.',
     },
     laidBack: {
+        /**
+         * Define the tenth productivity style.
+         */
         title: 'Laid-Back',
         description: 'You handle tasks calmly and prefer minimal stress. Just be mindful of deadlines and motivation.',
     },
 };
 
+/**
+ * Define the showExtras ref.
+ */
 const showExtras = ref(false);
 </script>
 

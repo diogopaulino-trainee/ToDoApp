@@ -6,10 +6,16 @@ import type { BreadcrumbItemType } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Timer } from 'lucide-vue-next';
 import Toast from 'primevue/toast';
-import { computed, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 
+/**
+ * Use the Pomodoro composable.
+ */
 const { formattedTime, isPomodoroFinished, isPomodoroRunning, resetPomodoro, startPomodoro } = usePomodoro();
 
+/**
+ * Watch the Pomodoro finished state.
+ */
 watch(isPomodoroFinished, (newVal) => {
     if (newVal) {
         setTimeout(() => {
@@ -18,6 +24,9 @@ watch(isPomodoroFinished, (newVal) => {
     }
 });
 
+/**
+ * Trigger the trash wiggle.
+ */
 const triggerTrashWiggle = () => {
     trashWiggle.value = true;
     setTimeout(() => {
@@ -25,24 +34,39 @@ const triggerTrashWiggle = () => {
     }, 1000);
 };
 
+/**
+ * Get the CSRF token.
+ */
 const csrfToken = usePage().props.csrf_token as string;
 
+/**
+ * Define the props.
+ */
 interface Props {
     title?: string;
     breadcrumbs?: BreadcrumbItemType[];
 }
 
+/**
+ * Define the default props.
+ */
 withDefaults(defineProps<Props>(), {
     title: 'App',
     breadcrumbs: () => [],
 });
 
+/**
+ * Define the AuthUser interface.
+ */
 interface AuthUser {
     id: number;
     name: string;
     email: string;
 }
 
+/**
+ * Define the InertiaProps interface.
+ */
 interface InertiaProps {
     auth?: {
         user?: AuthUser;
@@ -50,17 +74,63 @@ interface InertiaProps {
     [key: string]: any;
 }
 
+/**
+ * Get the page.
+ */
 const page = usePage<InertiaProps>();
+
+/**
+ * Get the auth user.
+ */
 const authUser = computed(() => page.props.auth?.user ?? null);
 
+/**
+ * Define the showPomodoroDropdown ref.
+ */
 const showPomodoroDropdown = ref(false);
+
+/**
+ * Define the selectedMinutes ref.
+ */
 const selectedMinutes = ref<number>(25);
 
+/**
+ * Define the pomodoroDropdownRef ref.
+ */
+const pomodoroDropdownRef = ref<HTMLElement | null>(null);
+
+/**
+ * Define the handleClickOutside function.
+ */
+const handleClickOutside = (event: MouseEvent) => {
+    if (showPomodoroDropdown.value && pomodoroDropdownRef.value && !pomodoroDropdownRef.value.contains(event.target as Node)) {
+        showPomodoroDropdown.value = false;
+    }
+};
+
+/**
+ * Add the event listener.
+ */
+document.addEventListener('click', handleClickOutside);
+
+/**
+ * Remove the event listener.
+ */
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
+/**
+ * Start the Pomodoro timer.
+ */
 function startPomodoroTimer() {
     startPomodoro(selectedMinutes.value);
     showPomodoroDropdown.value = false;
 }
 
+/**
+ * Reset the Pomodoro timer.
+ */
 function resetPomodoroTimer() {
     resetPomodoro();
 }
@@ -180,15 +250,17 @@ function resetPomodoroTimer() {
 
                     <div class="flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
                         <button
-                            @click="showPomodoroDropdown = !showPomodoroDropdown"
-                            class="group relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-700 shadow-lg ring-1 ring-purple-500 ring-offset-2 ring-offset-gray-900 transition-transform hover:scale-105 hover:bg-purple-800"
+                            @click.stop="showPomodoroDropdown = !showPomodoroDropdown"
+                            class="group relative inline-flex h-12 w-12 items-center justify-center rounded-full bg-purple-700 shadow-lg ring-1 ring-purple-500 ring-offset-2 ring-offset-gray-900 transition-transform hover:scale-105 hover:bg-purple-800"
                             title="Pomodoro Timer"
                         >
-                            <Timer class="h-5 w-5 text-white" />
+                            <Timer class="h-6 w-6 text-white" />
                         </button>
 
                         <div
                             v-if="showPomodoroDropdown"
+                            @click.stop
+                            ref="pomodoroDropdownRef"
                             class="absolute left-1/2 top-24 w-48 origin-top -translate-x-1/2 rounded-md bg-white p-4 text-gray-800 shadow-lg md:top-16"
                         >
                             <label class="block text-sm font-semibold">Select Minutes:</label>
@@ -228,7 +300,7 @@ function resetPomodoroTimer() {
         </header>
 
         <!-- SPACER FOR FIXED NAVBAR -->
-        <div class="h-[100px]"></div>
+        <div class="h-[140px] md:h-[100px]"></div>
 
         <!-- MAIN CONTENT AREA -->
         <main class="mx-auto mb-24 w-full max-w-5xl flex-grow p-6">
@@ -251,11 +323,17 @@ function resetPomodoroTimer() {
 </template>
 
 <style scoped>
+/**
+ * Animate gradient.
+ */
 .animate-gradient {
     animation: gradientBG 8s ease infinite alternate;
     background-size: 200% 200%;
 }
 
+/**
+ * Keyframes for gradientBG.
+ */
 @keyframes gradientBG {
     0% {
         background-position: 0% 50%;
@@ -265,10 +343,16 @@ function resetPomodoroTimer() {
     }
 }
 
+/**
+ * Animate border.
+ */
 .animate-border {
     animation: borderGlow 3s ease-in-out infinite alternate;
 }
 
+/**
+ * Keyframes for borderGlow.
+ */
 @keyframes borderGlow {
     from {
         opacity: 0.5;
@@ -278,6 +362,9 @@ function resetPomodoroTimer() {
     }
 }
 
+/**
+ * Disable the button.
+ */
 button:disabled {
     cursor: not-allowed;
 }

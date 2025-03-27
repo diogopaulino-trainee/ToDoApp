@@ -5,7 +5,11 @@ import { router, usePage } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watchEffect } from 'vue';
 
-// Props with task details including subtasks and attachments
+/**
+ * Define the props.
+ *
+ * @type {Props}
+ */
 const props = defineProps<{
     task: Task & {
         subtasks: { id: number; title: string; completed: boolean }[];
@@ -13,11 +17,23 @@ const props = defineProps<{
     };
 }>();
 
-// Toast for notifications (success/error)
+/**
+ * Define the toast.
+ *
+ * @type {ReturnType<typeof useToast>}
+ */
 const toast = useToast();
 
+/**
+ * Define the page.
+ */
 const page = usePage();
 
+/**
+ * Define the page props.
+ *
+ * @type {PageProps}
+ */
 interface PageProps {
     flash: {
         success?: string;
@@ -25,8 +41,16 @@ interface PageProps {
     };
 }
 
+/**
+ * Define the flash.
+ *
+ * @type {PageProps}
+ */
 const flash = (page.props as unknown as PageProps).flash;
 
+/**
+ * On mounted.
+ */
 onMounted(() => {
     const successMessage = flash?.success;
     const errorMessage = flash?.error;
@@ -137,6 +161,11 @@ const uploadFiles = () => {
     });
 };
 
+/**
+ * Define the deleteAttachment function.
+ *
+ * @param attachmentId - The id of the attachment to delete.
+ */
 const deleteAttachment = (attachmentId: number) => {
     router.delete(route('tasks.attachments.delete', [props.task.id, attachmentId]), {
         preserveScroll: true,
@@ -263,11 +292,23 @@ const deleteAttachment = (attachmentId: number) => {
                         <li
                             v-for="att in props.task.attachments"
                             :key="att.id"
-                            class="flex items-center justify-between rounded bg-gray-800 px-4 py-2"
+                            class="relative flex items-center justify-between rounded bg-gray-800 px-4 py-2"
                         >
-                            <a :href="att.url" target="_blank" class="text-blue-400 hover:underline">
-                                {{ att.name }}
-                            </a>
+                            <div class="group relative">
+                                <a :href="att.url" target="_blank" class="text-blue-400 hover:underline">
+                                    {{ att.name }}
+                                </a>
+
+                                <div
+                                    v-if="
+                                        att.url.endsWith('.jpg') || att.url.endsWith('.png') || att.url.endsWith('.jpeg') || att.url.endsWith('.gif')
+                                    "
+                                    class="absolute bottom-full left-0 z-50 mb-2 hidden w-48 rounded border border-gray-700 bg-black p-1 group-hover:block"
+                                >
+                                    <img :src="att.url" alt="preview" class="w-full rounded object-cover" />
+                                </div>
+                            </div>
+
                             <button @click="deleteAttachment(att.id)" class="text-red-500 transition hover:text-red-700" title="Delete">✕</button>
                         </li>
                     </ul>

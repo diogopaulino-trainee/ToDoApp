@@ -1,3 +1,8 @@
+/**
+ * Returns the initials of a full name.
+ * @param {string} fullName - The full name to get initials from
+ * @returns {string} The initials of the full name
+ */
 export function getInitials(fullName?: string): string {
     if (!fullName) return '';
 
@@ -9,6 +14,11 @@ export function getInitials(fullName?: string): string {
     return `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}`.toUpperCase();
 }
 
+/**
+ * Returns the initials of a full name.
+ * @param {string} fullName - The full name to get initials from
+ * @returns {string} The initials of the full name
+ */
 export function useInitials() {
     return { getInitials };
 }

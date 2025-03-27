@@ -2,6 +2,9 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
+/**
+ * Define the props.
+ */
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,

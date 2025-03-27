@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
 {
+    /**
+     * Upload attachments to a task.
+     *
+     * @param Request $request The request object.
+     * @param Task $task The task to upload attachments to.
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
     public function upload(Request $request, Task $task)
     {
         if ($task->user_id !== auth()->id()) {
@@ -41,6 +48,14 @@ class AttachmentController extends Controller
         return redirect()->route('tasks.show', $task->id)->with('success', 'Files uploaded successfully.');
     }
 
+    /**
+     * Delete an attachment from a task.
+     *
+     * @param Task $task The task to delete the attachment from.
+     * @param Attachment $attachment The attachment to delete.
+     * @param Request $request The request object.
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
     public function delete(Task $task, Attachment $attachment, Request $request)
     {
         if ($task->user_id !== auth()->id() || $attachment->task_id !== $task->id) {

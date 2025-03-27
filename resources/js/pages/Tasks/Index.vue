@@ -9,26 +9,68 @@ import { ref, watchEffect } from 'vue';
 import Flatpickr from 'vue-flatpickr-component';
 import draggable from 'vuedraggable';
 
+/**
+ * Define the showSubtaskModal ref.
+ *
+ * @type {Ref<boolean>}
+ */
 const showSubtaskModal = ref(false);
+
+/**
+ * Define the selectedTaskId ref.
+ *
+ * @type {Ref<number | null>}
+ */
 const selectedTaskId = ref<number | null>(null);
+
+/**
+ * Define the selectedTaskTitle ref.
+ *
+ * @type {Ref<string>}
+ */
 const selectedTaskTitle = ref<string>('');
 
+/**
+ * Define the openSubtaskModal function.
+ *
+ * @param task - The task to open the modal for.
+ */
 const openSubtaskModal = (task: Task) => {
     selectedTaskId.value = task.id;
     selectedTaskTitle.value = task.title;
     showSubtaskModal.value = true;
 };
 
+/**
+ * Define the closeSubtaskModal function.
+ *
+ * @type {Function}
+ */
 const closeSubtaskModal = () => {
     showSubtaskModal.value = false;
 };
 
+/**
+ * Define the props.
+ *
+ * @type {Props}
+ */
 const props = defineProps<{
     tasks: Task[];
 }>();
 
+/**
+ * Define the showForm ref.
+ *
+ * @type {Ref<boolean>}
+ */
 const showForm = ref(false);
 
+/**
+ * Define the form.
+ *
+ * @type {ReturnType<typeof useTasks>}
+ */
 const {
     form,
     isLoading,
@@ -52,8 +94,14 @@ const {
     deleteTask,
     saveTaskEdit,
     togglePriority,
+    isAnyTaskEditing,
 } = useTasks(props.tasks);
 
+/**
+ * Watch the flashMessage and errorMessage.
+ *
+ * @type {Function}
+ */
 watchEffect(() => {
     if (flashMessage.value || errorMessage.value) {
         setTimeout(() => {
@@ -251,11 +299,22 @@ watchEffect(() => {
                     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Pending Tasks -->
                         <div class="scrollbar-thin max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
-                            <h3 class="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">Pending Tasks</h3>
+                            <h3 class="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
+                                Pending Tasks
+                                <span v-if="filteredPendingTasks.length > 0" class="ml-2 text-sm text-gray-500">
+                                    ({{ filteredPendingTasks.length }})
+                                </span>
+                            </h3>
                             <div v-if="!filteredPendingTasks.length && pendingTasks.length" class="py-4 text-center italic text-gray-400">
                                 No matching pending tasks found for your search. Try adjusting the keywords!
                             </div>
-                            <draggable :list="filteredPendingTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, false)">
+                            <draggable
+                                :list="filteredPendingTasks"
+                                group="tasks"
+                                itemKey="id"
+                                @change="(evt) => updateTasks(evt, false)"
+                                :disabled="isAnyTaskEditing(filteredPendingTasks)"
+                            >
                                 <template #item="{ element: task, index }">
                                     <div>
                                         <div
@@ -448,11 +507,22 @@ watchEffect(() => {
 
                         <!-- Completed Tasks -->
                         <div class="scrollbar-thin max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
-                            <h3 class="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">Completed Tasks</h3>
+                            <h3 class="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
+                                Completed Tasks
+                                <span v-if="filteredCompletedTasks.length > 0" class="ml-2 text-sm text-gray-500">
+                                    ({{ filteredCompletedTasks.length }})
+                                </span>
+                            </h3>
                             <div v-if="!filteredCompletedTasks.length && completedTasks.length" class="py-4 text-center italic text-gray-400">
                                 No matching completed tasks found. Try a different search term.
                             </div>
-                            <draggable :list="filteredCompletedTasks" group="tasks" itemKey="id" @change="(evt) => updateTasks(evt, true)">
+                            <draggable
+                                :list="filteredCompletedTasks"
+                                group="tasks"
+                                itemKey="id"
+                                @change="(evt) => updateTasks(evt, true)"
+                                :disabled="isAnyTaskEditing(filteredCompletedTasks)"
+                            >
                                 <template #item="{ element: task, index }">
                                     <div>
                                         <div

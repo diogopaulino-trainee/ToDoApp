@@ -1,22 +1,46 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import confetti from 'canvas-confetti';
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { Bar } from 'vue-chartjs';
 
+/**
+ * Register the ChartJS components.
+ */
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+/**
+ * Define the page.
+ */
 const page = usePage<{
     completedCount: number;
     pendingCount: number;
+    currentLevel: { id: number; name: string; description: string } | null;
+    levels: { id: number; name: string; description: string; required_tasks: number }[];
+    showConfetti: boolean;
     auth: { user: AuthUser };
 }>();
 
+/**
+ * Define the user.
+ */
 const user = computed(() => page.props.auth.user);
+
+/**
+ * Define the completed tasks.
+ */
 const completedTasks = computed(() => page.props.completedCount);
+
+/**
+ * Define the pending tasks.
+ */
 const pendingTasks = computed(() => page.props.pendingCount);
 
+/**
+ * Define the chart data.
+ */
 const chartData = computed(() => ({
     labels: ['Completed', 'Pending'],
     datasets: [
@@ -30,6 +54,9 @@ const chartData = computed(() => ({
     ],
 }));
 
+/**
+ * Define the chart options.
+ */
 const chartOptions = {
     indexAxis: 'y' as const,
     responsive: true,
@@ -38,7 +65,7 @@ const chartOptions = {
         x: {
             beginAtZero: true,
             ticks: {
-                color: '#d1d5db', // Tailwind slate-300
+                color: '#d1d5db',
             },
         },
         y: {
@@ -57,12 +84,18 @@ const chartOptions = {
     },
 };
 
+/**
+ * Define the AuthUser interface.
+ */
 interface AuthUser {
     id: number;
     name: string;
     email: string;
 }
 
+/**
+ * Define the PageProps interface.
+ */
 interface PageProps {
     auth: {
         user: {
@@ -73,6 +106,16 @@ interface PageProps {
     };
     [key: string]: unknown;
 }
+
+onMounted(() => {
+    if (page.props.showConfetti) {
+        confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.6 },
+        });
+    }
+});
 </script>
 
 <template>
@@ -167,6 +210,54 @@ interface PageProps {
 
                 <div class="relative h-[220px] w-full">
                     <Bar :data="chartData" :options="chartOptions" />
+                </div>
+            </div>
+            <!-- Levels Progress -->
+            <div class="mt-10 rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+                <div class="mb-3 flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 1010 10A10 10 0 0012 2z" />
+                    </svg>
+                    <span class="font-semibold">Your Level Progress</span>
+                </div>
+                <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">Advance levels by completing more tasks. Keep the momentum going!</p>
+
+                <div class="flex flex-col gap-4">
+                    <div
+                        v-for="level in page.props.levels"
+                        :key="level.id"
+                        class="relative flex flex-col items-center justify-center rounded-lg border p-4 text-center transition-all duration-300"
+                        :class="{
+                            'scale-105 border-green-600 bg-green-200 font-bold text-black dark:border-green-400 dark:bg-green-700 dark:text-white':
+                                page.props.currentLevel?.id === level.id,
+                            'border-gray-400 bg-gray-100 text-gray-400 dark:border-gray-600 dark:bg-gray-700':
+                                (page.props.currentLevel?.id || 0) < level.id,
+                        }"
+                    >
+                        <div
+                            v-if="(page.props.currentLevel?.id || 0) < level.id"
+                            class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-sm"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-8 w-8 text-white opacity-80"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 11c-1.1 0-2 .9-2 2v1c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-1c0-1.1-.9-2-2-2zM17 8V7a5 5 0 00-10 0v1M5 8h14v12H5z"
+                                />
+                            </svg>
+                        </div>
+
+                        <span class="z-20 text-xl">{{ level.name }}</span>
+                        <small class="z-20 mt-1 text-sm">{{ level.description }}</small>
+                    </div>
                 </div>
             </div>
         </template>

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\SubTask;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder
@@ -17,13 +16,23 @@ class TaskSeeder extends Seeder
     {
         $users = User::all();
 
-        $users->each(function ($user) {
-            Task::factory(10)->create([
+        $completedCounts = [4, 35, 15, 5, 0];
+
+        $users->each(function ($user, $index) use ($completedCounts) {
+            $completedCount = $completedCounts[$index] ?? rand(0, 50);
+
+            $tasks = Task::factory(50)->create([
                 'user_id' => $user->id,
-            ])->each(function ($task) {
+            ]);
+
+            $tasks->each(function ($task, $i) use ($completedCount) {
+                $task->update([
+                    'completed' => $i < $completedCount,
+                ]);
+
                 SubTask::factory(rand(1, 3))->create([
                     'task_id' => $task->id,
-                    'completed' => $task->completed,
+                    'completed' => $i < $completedCount,
                 ]);
             });
         });

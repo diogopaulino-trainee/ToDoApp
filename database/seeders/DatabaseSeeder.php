@@ -13,9 +13,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        /**
+         * Seed the application's database.
+         */
         $this->call([
             UserSeeder::class,
             TaskSeeder::class,
+            LevelSeeder::class,
+            UserLevelSeeder::class,
         ]);
     }
 }

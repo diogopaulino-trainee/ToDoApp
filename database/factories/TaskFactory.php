@@ -10,8 +10,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TaskFactory extends Factory
 {
+    /**
+     * The model that the factory should create.
+     *
+     * @var string
+     */
     protected $model = Task::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [

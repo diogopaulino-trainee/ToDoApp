@@ -127,6 +127,7 @@ TODOAPP
 - AI Assistant (Chatbot) for instant support, quick links, and motivational messages
 - Help & Motivation Page with FAQs, productivity tips, a mood switcher, and an interactive quiz
 - Pomodoro Timer** to enhance focus with work/break intervals
+- User Levels on Dashboard based on Completed Tasks
 - Fully tested with PHPUnit
 
 ---

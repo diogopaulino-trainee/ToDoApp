@@ -135,6 +135,9 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    /**
+     * Controls the visibility of the task creation form.
+     */
     const showForm = ref(false);
 
     /**
@@ -269,8 +272,15 @@ export function useTasks(propsTasks: Task[]) {
         }, 600);
     };
 
+    /**
+     * Controls the saving state of a task.
+     */
     const isSaving = ref(false);
 
+    /**
+     * Updates a task with the edited values.
+     * Shows a toast on success or reloads on error.
+     */
     const saveTaskEdit = (task: Task) => {
         if (isSaving.value) return;
 
@@ -313,6 +323,9 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    /**
+     * Cycles the task priority and updates it on the server.
+     */
     const togglePriority = (task: Task) => {
         const priorities = ['low', 'medium', 'high'];
         const currentIndex = priorities.indexOf(task.priority);
@@ -339,10 +352,19 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    // Search input value
     const searchTerm = ref('');
+    // Current sorting option ('priority' or 'due_datetime')
     const sortBy = ref<'priority' | 'due_datetime'>('due_datetime');
+    // Sorting direction: ascending or descending
     const sortDirection = ref<'asc' | 'desc'>('asc');
 
+    /**
+     * Sorts the given tasks based on selected criteria.
+     *
+     * @param tasks - Tasks to sort
+     * @returns Sorted tasks
+     */
     const sortTasks = (tasks: Task[]) => {
         return [...tasks].sort((a, b) => {
             if (sortBy.value === 'priority') {
@@ -362,6 +384,12 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    /**
+     * Filters tasks based on search criteria.
+     *
+     * @param task - Task to filter
+     * @returns True if task matches all filters, false otherwise
+     */
     const matchesSearch = (task: Task) => {
         const search = searchTerm.value.toLowerCase();
 
@@ -375,14 +403,29 @@ export function useTasks(propsTasks: Task[]) {
         );
     };
 
+    // Active priority filter
     const priorityFilter = ref<'all' | 'low' | 'medium' | 'high'>('all');
+    // Active date filter
     const dateFilter = ref<'all' | 'today' | 'week' | 'month' | 'next_month' | 'after_this_month' | 'overdue'>('all');
+    // Active attachments filter
     const hasAttachmentsFilter = ref<'all' | 'with' | 'without'>('all');
 
+    /**
+     * Matches tasks based on priority filter.
+     *
+     * @param task - Task to match
+     * @returns True if task matches priority filter, false otherwise
+     */
     const matchesPriority = (task: Task) => {
         return priorityFilter.value === 'all' || task.priority === priorityFilter.value;
     };
 
+    /**
+     * Matches tasks based on date filter.
+     *
+     * @param task - Task to match
+     * @returns True if task matches date filter, false otherwise
+     */
     const matchesDate = (task: Task) => {
         if (!task.due_datetime) return dateFilter.value === 'all';
 
@@ -408,6 +451,12 @@ export function useTasks(propsTasks: Task[]) {
         }
     };
 
+    /**
+     * Matches tasks based on attachments filter.
+     *
+     * @param task - Task to match
+     * @returns True if task matches attachments filter, false otherwise
+     */
     const matchesAttachments = (task: Task) => {
         const hasAttachments = Array.isArray(task.attachments) && task.attachments.length > 0;
 
@@ -422,8 +471,18 @@ export function useTasks(propsTasks: Task[]) {
         return true;
     };
 
+    /**
+     * Computes filtered tasks based on search criteria.
+     *
+     * @returns Filtered and sorted tasks
+     */
     const filteredPendingTasks = computed(() => sortTasks(pendingTasks.value.filter(matchesSearch)));
 
+    /**
+     * Computes filtered tasks based on search criteria.
+     *
+     * @returns Filtered and sorted tasks
+     */
     const filteredCompletedTasks = computed(() => sortTasks(completedTasks.value.filter(matchesSearch)));
 
     /**
@@ -446,6 +505,12 @@ export function useTasks(propsTasks: Task[]) {
         showSubtaskModal.value = true;
     };
 
+    /**
+     * Uploads attachments to a task.
+     *
+     * @param files - FileList of attachments to upload
+     * @param taskId - ID of the task to upload attachments to
+     */
     const uploadAttachments = async (files: FileList | null, taskId: number) => {
         if (!files || files.length === 0) return;
 
@@ -476,6 +541,12 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    /**
+     * Deletes an attachment from a task.
+     *
+     * @param taskId - ID of the task to delete attachment from
+     * @param attachmentId - ID of the attachment to delete
+     */
     const deleteAttachment = async (taskId: number, attachmentId: number) => {
         await router.delete(route('tasks.attachments.delete', [taskId, attachmentId]), {
             preserveScroll: true,
@@ -499,6 +570,21 @@ export function useTasks(propsTasks: Task[]) {
         });
     };
 
+    /**
+     * Checks if any task is currently being edited.
+     *
+     * @param tasks - List of tasks to check
+     * @returns True if any task is being edited
+     */
+    const isAnyTaskEditing = (tasks: Task[]) => {
+        return tasks.some((t) => t.isEditingTitle || t.isEditingDescription || t.isEditingDate);
+    };
+
+    /**
+     * Returns the form, loading state, and task management methods.
+     *
+     * @returns Object containing form data, state, and task methods
+     */
     return {
         form,
         isLoading,
@@ -529,5 +615,6 @@ export function useTasks(propsTasks: Task[]) {
         removeSubtaskField,
         uploadAttachments,
         deleteAttachment,
+        isAnyTaskEditing,
     };
 }

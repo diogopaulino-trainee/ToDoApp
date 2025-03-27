@@ -1,3 +1,6 @@
+/**
+ * Import the quotes.
+ */
 import {
     badWordsReplies,
     commandReplies,
@@ -181,6 +184,9 @@ export const useChatBotStore = defineStore('chatBot', () => {
         onBotResponded?.();
     }
 
+    /**
+     * Set the interval to send a motivational quote every 5 minutes if autoMode is enabled.
+     */
     setInterval(
         () => {
             if (autoMode.value) {
@@ -191,8 +197,14 @@ export const useChatBotStore = defineStore('chatBot', () => {
         5 * 60 * 1000,
     );
 
+    /**
+     * Watch the autoMode and save the autoMode to localStorage.
+     */
     watch(autoMode, saveAutoMode);
 
+    /**
+     * Return the store.
+     */
     return {
         isOpen,
         messages,
