@@ -117,6 +117,7 @@ class TaskController extends Controller
     
                         if ($userLevel->level_id !== $newLevel->id) {
                             $userLevel->level_id = $newLevel->id;
+                            $userLevel->animation_seen = false;
                             $userLevel->save();
     
                             return redirect()
