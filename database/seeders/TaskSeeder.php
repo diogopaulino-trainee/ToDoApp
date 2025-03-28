@@ -16,7 +16,7 @@ class TaskSeeder extends Seeder
     {
         $users = User::all();
 
-        $completedCounts = [4, 35, 15, 5, 0];
+        $completedCounts = [14, 35, 15, 5, 0];
 
         $users->each(function ($user, $index) use ($completedCounts) {
             $completedCount = $completedCounts[$index] ?? rand(0, 50);

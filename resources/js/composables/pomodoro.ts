@@ -53,6 +53,9 @@ export function usePomodoro() {
         }
         isPomodoroRunning.value = true;
         isPomodoroFinished.value = false;
+        // Persist end time in localStorage
+        const endTime = Date.now() + remainingTime.value * 1000;
+        localStorage.setItem('pomodoroEndTime', endTime.toString());
         timerInterval = window.setInterval(() => {
             if (remainingTime.value > 0) {
                 remainingTime.value--;
@@ -62,6 +65,7 @@ export function usePomodoro() {
                 isPomodoroFinished.value = true;
                 clearInterval(timerInterval!);
                 timerInterval = null;
+                localStorage.removeItem('pomodoroEndTime');
                 playPlimSound();
             }
         }, 1000);
@@ -78,6 +82,8 @@ export function usePomodoro() {
         remainingTime.value = pomodoroMinutes.value * 60;
         isPomodoroRunning.value = false;
         isPomodoroFinished.value = false;
+        // Remove persisted end time from localStorage
+        localStorage.removeItem('pomodoroEndTime');
     }
 
     /**
@@ -98,6 +104,32 @@ export function usePomodoro() {
             clearInterval(timerInterval);
         }
     });
+
+    // Restore timer state from localStorage if available
+    const storedEndTime = localStorage.getItem('pomodoroEndTime');
+    if (storedEndTime) {
+        const endTime = parseInt(storedEndTime, 10);
+        const now = Date.now();
+        if (endTime > now) {
+            remainingTime.value = Math.floor((endTime - now) / 1000);
+            isPomodoroRunning.value = true;
+            timerInterval = window.setInterval(() => {
+                if (remainingTime.value > 0) {
+                    remainingTime.value--;
+                } else {
+                    isPomodoroRunning.value = false;
+                    isPomodoroFinished.value = true;
+                    clearInterval(timerInterval!);
+                    timerInterval = null;
+                    localStorage.removeItem('pomodoroEndTime');
+                    playPlimSound();
+                }
+            }, 1000);
+        } else {
+            isPomodoroFinished.value = true;
+            localStorage.removeItem('pomodoroEndTime');
+        }
+    }
 
     /**
      * Returns the Pomodoro timer state and methods.
